@@ -83,7 +83,11 @@ def show_auth_gate():
         if submitted:
             try:
                 result = client.auth.sign_in_with_password({"email": email.strip(), "password": password})
-                st.session_state.auth_user = {"id": str(result.user.id), "email": result.user.email}
+                metadata = getattr(result.user, "user_metadata", None) or {}
+                st.session_state.auth_user = {
+                    "id": str(result.user.id), "email": result.user.email,
+                    "phone": metadata.get("phone"),
+                }
                 st.session_state.auth_token = result.session.access_token
                 st.rerun()
             except Exception:
@@ -111,7 +115,10 @@ def show_auth_gate():
                         "options": {"data": {"phone": phone.strip()}},
                     })
                     if result.session:
-                        st.session_state.auth_user = {"id": str(result.user.id), "email": result.user.email}
+                        st.session_state.auth_user = {
+                            "id": str(result.user.id), "email": result.user.email,
+                            "phone": phone.strip(),
+                        }
                         st.session_state.auth_token = result.session.access_token
                         st.rerun()
                     else:
@@ -904,10 +911,6 @@ with tab_books:
                 a, b_ = st.columns(2)
                 title = a.text_input("Book title")
                 seller = b_.text_input("Your name")
-                phone = st.text_input(
-                    "Phone number shown after a book request", placeholder="+91 98765 43210",
-                    help="Use the full international format, including country code, for WhatsApp.",
-                )
                 c1, c2, c3, c4 = st.columns(4)
                 ex = c1.selectbox("Exam", ["JEE", "NEET", "Boards"])
                 sub = c2.selectbox("Subject", ["Physics", "Chemistry", "Maths", "Biology"])
@@ -918,13 +921,18 @@ with tab_books:
             if publish:
                 if not title.strip() or not seller.strip():
                     st.error("Add the book title and your name.")
-                elif sum(ch.isdigit() for ch in phone) < 7:
-                    st.error("Enter a valid phone number so buyers can contact you after requesting.")
                 else:
                     try:
+                        saved_phone = current_user.get("phone")
+                        if not saved_phone:
+                            profile = load_contact_profiles([current_user["id"]]).get(current_user["id"], {})
+                            saved_phone = profile.get("phone")
+                        if not saved_phone:
+                            st.error("Your account has no saved phone number. Add it to your account before listing a book.")
+                            st.stop()
                         db_client().table("user_profiles").upsert({
                             "user_id": current_user["id"], "email": current_user["email"],
-                            "phone": phone.strip(),
+                            "phone": saved_phone,
                         }, on_conflict="user_id").execute()
                         db_client().table("book_listings").insert({
                             "owner_id": current_user["id"], "title": title.strip(),
@@ -950,7 +958,6 @@ with tab_books:
         key = str(request["listing_id"])
         counts[key] = counts.get(key, 0) + 1
     active_mine = [book for book in my_listings if book.get("status", "active") == "active"]
-    sold_mine = [book for book in my_listings if book.get("status") == "sold"]
 
     if not active_mine:
         st.caption("You have no active book listings.")
@@ -967,30 +974,6 @@ with tab_books:
                 st.rerun()
             except Exception as e:
                 st.error(f"Could not mark the book sold. Run the latest sales migration SQL. ({type(e).__name__})")
-
-    with st.expander("Contact details and sold-book history"):
-        with st.form("seller_contact_form"):
-            st.write("Update the email and phone buyers receive after requesting one of your books.")
-            phone_update = st.text_input("Phone number", placeholder="+91 98765 43210", key="seller_phone_update")
-            contact_saved = st.form_submit_button("Save contact details")
-        if contact_saved:
-            if sum(ch.isdigit() for ch in phone_update) < 7:
-                st.error("Enter a valid phone number.")
-            else:
-                try:
-                    db_client().table("user_profiles").upsert({
-                        "user_id": current_user["id"], "email": current_user["email"],
-                        "phone": phone_update.strip(),
-                    }, on_conflict="user_id").execute()
-                    st.success("Contact details updated.")
-                except Exception as e:
-                    st.error(f"Could not update contact details. ({type(e).__name__})")
-        if sold_mine:
-            st.markdown("**Sold books**")
-            for book in sold_mine:
-                st.caption(f"{book['title']} · Sold")
-        else:
-            st.caption("No sold books yet.")
 
 # Sound Check
 # ----------------------------------------------------------------------------
