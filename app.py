@@ -37,6 +37,13 @@ def get_supabase_client():
     return st.session_state.supabase_client
 
 
+def render_brand(size=72):
+    logo_col, name_col = st.columns([1, 5], vertical_alignment="center")
+    with logo_col:
+        st.image("logo.png", width=size)
+    with name_col:
+        st.markdown("# ReLoop")
+
 def show_auth_gate():
     client = get_supabase_client()
     user = st.session_state.get("auth_user")
@@ -56,8 +63,7 @@ def show_auth_gate():
             client.postgrest.auth(token)
         return user
 
-    st.image('logo.png', width=110)
-    st.title('ReLoop')
+    render_brand(88)
     st.subheader("Welcome — log in or create an account")
     login_tab, signup_tab = st.tabs(["Log in", "Sign up"])
 
@@ -102,8 +108,7 @@ def show_auth_gate():
 
 
 current_user = show_auth_gate()
-
-st.image('logo.png', width=92)
+render_brand(64)
 
 # ----------------------------------------------------------------------------
 # Design tokens
@@ -832,5 +837,4 @@ with tab_impact:
     vdf = pd.DataFrame({"Verdict": list(ss.verdicts), "Count": list(ss.verdicts.values())}).set_index("Verdict")
     st.bar_chart(vdf, color=MARIGOLD, height=220)
     st.caption("Totals are for this session. Connect Supabase to keep them across visits.")
-
 
