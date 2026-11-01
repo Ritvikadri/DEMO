@@ -56,7 +56,8 @@ def show_auth_gate():
             client.postgrest.auth(token)
         return user
 
-    st.title("♻️ ReLoop")
+    st.image('logo.png', width=110)
+    st.title('ReLoop')
     st.subheader("Welcome — log in or create an account")
     login_tab, signup_tab = st.tabs(["Log in", "Sign up"])
 
@@ -101,6 +102,8 @@ def show_auth_gate():
 
 
 current_user = show_auth_gate()
+
+st.image('logo.png', width=92)
 
 # ----------------------------------------------------------------------------
 # Design tokens
@@ -829,3 +832,5 @@ with tab_impact:
     vdf = pd.DataFrame({"Verdict": list(ss.verdicts), "Count": list(ss.verdicts.values())}).set_index("Verdict")
     st.bar_chart(vdf, color=MARIGOLD, height=220)
     st.caption("Totals are for this session. Connect Supabase to keep them across visits.")
+
+
