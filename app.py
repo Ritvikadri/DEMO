@@ -92,6 +92,7 @@ def show_auth_gate():
     with signup_tab:
         with st.form("reloop_signup_form"):
             email = st.text_input("Email", key="reloop_signup_email")
+            phone = st.text_input("Phone number", placeholder="+91 98765 43210", key="reloop_signup_phone")
             password = st.text_input("Password (at least 8 characters)", type="password", key="reloop_signup_password")
             confirm = st.text_input("Confirm password", type="password", key="reloop_signup_confirm")
             submitted = st.form_submit_button("Create account", use_container_width=True)
@@ -100,9 +101,15 @@ def show_auth_gate():
                 st.error("The passwords do not match.")
             elif len(password) < 8:
                 st.error("Use a password with at least 8 characters.")
+            elif sum(ch.isdigit() for ch in phone) < 7:
+                st.error("Enter a valid phone number.")
             else:
                 try:
-                    result = client.auth.sign_up({"email": email.strip(), "password": password})
+                    result = client.auth.sign_up({
+                        "email": email.strip(),
+                        "password": password,
+                        "options": {"data": {"phone": phone.strip()}},
+                    })
                     if result.session:
                         st.session_state.auth_user = {"id": str(result.user.id), "email": result.user.email}
                         st.session_state.auth_token = result.session.access_token
@@ -231,6 +238,16 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .stButton > button:hover, .stFormSubmitButton > button:hover {{ filter: brightness(1.08); transform: translateY(-1px); color: {SPRUCE}; border: 0; }}
 .stButton > button:focus-visible {{ outline: 3px solid {MINT}; outline-offset: 2px; }}
 .stButton > button:disabled {{ background: {SURFACE2}; color: {MUTE}; box-shadow: none; }}
+.st-key-list_book_button button {{
+  --list-prox: 0;
+  background: linear-gradient(135deg, #FFD45C, #F2B138);
+  font-weight: 800; border: 0;
+  box-shadow: 0 0 calc(10px + var(--list-prox) * 30px) rgba(242,177,56,calc(.28 + var(--list-prox) * .5)),
+              0 8px calc(22px + var(--list-prox) * 38px) rgba(242,177,56,calc(.18 + var(--list-prox) * .35));
+  transition: box-shadow .15s ease, transform .15s ease, filter .15s ease;
+}}
+.st-key-list_book_button button:hover {{ filter: brightness(1.12); transform: translateY(-2px); }}
+
 
 [data-testid="stMetric"] {{ background: linear-gradient(180deg, {SURFACE2}, {SURFACE}); border: 1px solid {LINE}; border-radius: 18px; padding: 16px 20px; }}
 [data-testid="stMetricValue"] {{ font-family: 'Bricolage Grotesque'; font-weight: 800; color: {MARIGOLD}; }}
@@ -621,6 +638,15 @@ components.html(
       var t = Math.max(0, Math.min(1, 1 - Math.hypot(dx, dy) / R));
       t = t * t * (3 - 2 * t); // smoothstep
       board.style.setProperty("--prox", t.toFixed(3));
+      var listButton = p.document.querySelector(".st-key-list_book_button button");
+      if (listButton) {
+        var b = listButton.getBoundingClientRect();
+        var bx = Math.max(b.left - e.clientX, 0, e.clientX - b.right);
+        var by = Math.max(b.top - e.clientY, 0, e.clientY - b.bottom);
+        var bt = Math.max(0, Math.min(1, 1 - Math.hypot(bx, by) / 260));
+        bt = bt * bt * (3 - 2 * bt);
+        listButton.style.setProperty("--list-prox", bt.toFixed(3));
+      }
     };
     p.document.addEventListener("mousemove", p.__rlProxHandler);
   } catch (err) {}
@@ -776,7 +802,11 @@ with tab_scrap:
 # Book Loop
 # ----------------------------------------------------------------------------
 with tab_books:
-    st.subheader("Pass on your books. Buy for less.")
+    title_col, action_col = st.columns([4.5, 1.8], vertical_alignment="center")
+    title_col.subheader("Pass on your books. Buy for less.")
+    if action_col.button("＋ List a book", key="list_book_button", use_container_width=True):
+        st.session_state.show_book_form = True
+
     f1, f2, f3 = st.columns([1, 1, 2])
     exam = f1.selectbox("Exam", ["All", "JEE", "NEET", "Boards"])
     subject = f2.selectbox("Subject", ["All", "Physics", "Chemistry", "Maths", "Biology"])
@@ -792,7 +822,7 @@ with tab_books:
         contact_by_owner = load_contact_profiles(owners_to_contact)
     except Exception as e:
         listings, requested_ids, contact_by_owner = [], set(), {}
-        st.error(f"Could not load book listings or contacts. Check the latest Supabase SQL and RLS policies. ({type(e).__name__})")
+        st.error(f"Could not load book listings or contacts. Check Supabase SQL and RLS policies. ({type(e).__name__})")
 
     shown = [
         row for row in listings
@@ -801,7 +831,7 @@ with tab_books:
         and q.lower() in row["title"].lower()
     ]
     if not shown:
-        st.info("No book listings match yet. Add a book below; saved listings will appear here for everyone signed in.")
+        st.info("No active listings match. List a book to add it to ReLoop.")
 
     for row_start in range(0, len(shown), 3):
         cols = st.columns(3, gap="medium")
@@ -825,7 +855,7 @@ with tab_books:
                 listing_id = str(book["id"])
                 owner_id = str(book["owner_id"])
                 if owner_id == current_user["id"]:
-                    st.caption("Your listing — manage it under My listings below.")
+                    st.caption("Your active listing — see My books for sale below.")
                 elif listing_id in requested_ids:
                     st.button("Request sent", key=f"req_{listing_id}", disabled=True)
                     contact = contact_by_owner.get(owner_id)
@@ -838,89 +868,110 @@ with tab_books:
                             f"{book['title']}, listed on ReLoop for ₹{int(book['price'])}. "
                             "Is it still available? Could we discuss pickup or delivery?"
                         )
-                        subject = f"ReLoop book request: {book['title']}"
+                        mail_subject = f"ReLoop book request: {book['title']}"
                         actions = st.columns(2)
                         phone_digits = "".join(ch for ch in owner_phone if ch.isdigit())
                         if len(phone_digits) >= 10:
                             wa_url = f"https://wa.me/{phone_digits}?text={quote(message, safe='')}"
                             actions[0].link_button("Message on WhatsApp", wa_url, use_container_width=True)
                         else:
-                            actions[0].caption("WhatsApp link unavailable: owner needs to add a full phone number with country code.")
+                            actions[0].caption("WhatsApp needs the owner’s full phone number with country code.")
                         if owner_email:
-                            gmail_url = (
-                                "https://mail.google.com/mail/?view=cm&fs=1&"
-                                + urlencode({"to": owner_email, "su": subject, "body": message})
+                            gmail_url = "https://mail.google.com/mail/?view=cm&fs=1&" + urlencode(
+                                {"to": owner_email, "su": mail_subject, "body": message}
                             )
                             actions[1].link_button("Compose email", gmail_url, use_container_width=True)
                         else:
                             actions[1].caption("Email draft unavailable: owner email is missing.")
                     else:
-                        st.warning("Your request is saved, but the owner’s contact profile is unavailable. Please try again later.")
+                        st.warning("Your request is saved, but the owner’s contact profile is unavailable.")
                 elif st.button("Request this book", key=f"req_{listing_id}"):
                     try:
                         db_client().table("book_requests").insert({
                             "listing_id": listing_id, "requester_id": current_user["id"]
                         }).execute()
                         add_impact_record("book_request", amount=saving, details={"listing_id": listing_id})
-                        st.success("Request sent. The owner’s email and phone will appear on this listing.")
+                        st.success("Request sent. The owner’s email and phone will appear here.")
                         st.rerun()
                     except Exception as e:
                         st.error(f"Could not send this request. ({type(e).__name__})")
 
-    st.markdown("&nbsp;")
-    with st.expander("List a book you no longer need"):
-        with st.form("add_book", clear_on_submit=True):
-            a, b_ = st.columns(2)
-            title = a.text_input("Title")
-            seller = b_.text_input("Your name")
-            phone = st.text_input("Phone number shown after a book request", placeholder="+91 98765 43210", help="Use the full international format, including country code, for the WhatsApp link.")
-            c1, c2, c3, c4 = st.columns(4)
-            ex = c1.selectbox("Exam", ["JEE", "NEET", "Boards"])
-            sub = c2.selectbox("Subject", ["Physics", "Chemistry", "Maths", "Biology"])
-            cond = c3.selectbox("Condition", ["Like new", "Good", "Fair"])
-            mrp = c4.number_input("Original price (₹)", min_value=50, value=500, step=10)
-            price = st.slider("Your price (₹)", 10, int(mrp), int(mrp * 0.4))
-            submitted = st.form_submit_button("List this book")
-        if submitted:
-            digit_count = sum(ch.isdigit() for ch in phone)
-            if not title.strip() or not seller.strip():
-                st.error("Add the book title and your name to list it.")
-            elif digit_count < 7:
-                st.error("Enter a valid phone number so buyers can contact you after requesting.")
-            else:
-                try:
-                    db_client().table("user_profiles").upsert({
-                        "user_id": current_user["id"],
-                        "email": current_user["email"],
-                        "phone": phone.strip(),
-                    }, on_conflict="user_id").execute()
-                    db_client().table("book_listings").insert({
-                        "owner_id": current_user["id"], "title": title.strip(),
-                        "exam": ex, "subject": sub, "condition": cond,
-                        "mrp": int(mrp), "price": int(price), "seller_name": seller.strip(),
-                    }).execute()
-                    st.success("Book listing saved to the ReLoop database.")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Could not save the listing. Check the latest Supabase SQL. ({type(e).__name__})")
+    # Catchy, always-visible action is beside the section title above.
+    if st.session_state.get("show_book_form", False):
+        with st.container(border=True):
+            st.markdown("#### List a book for sale")
+            with st.form("add_book", clear_on_submit=True):
+                a, b_ = st.columns(2)
+                title = a.text_input("Book title")
+                seller = b_.text_input("Your name")
+                phone = st.text_input(
+                    "Phone number shown after a book request", placeholder="+91 98765 43210",
+                    help="Use the full international format, including country code, for WhatsApp.",
+                )
+                c1, c2, c3, c4 = st.columns(4)
+                ex = c1.selectbox("Exam", ["JEE", "NEET", "Boards"])
+                sub = c2.selectbox("Subject", ["Physics", "Chemistry", "Maths", "Biology"])
+                cond = c3.selectbox("Condition", ["Like new", "Good", "Fair"])
+                mrp = c4.number_input("Original price (₹)", min_value=50, value=500, step=10)
+                price = st.slider("Your price (₹)", 10, int(mrp), int(mrp * 0.4))
+                publish = st.form_submit_button("Publish listing")
+            if publish:
+                if not title.strip() or not seller.strip():
+                    st.error("Add the book title and your name.")
+                elif sum(ch.isdigit() for ch in phone) < 7:
+                    st.error("Enter a valid phone number so buyers can contact you after requesting.")
+                else:
+                    try:
+                        db_client().table("user_profiles").upsert({
+                            "user_id": current_user["id"], "email": current_user["email"],
+                            "phone": phone.strip(),
+                        }, on_conflict="user_id").execute()
+                        db_client().table("book_listings").insert({
+                            "owner_id": current_user["id"], "title": title.strip(),
+                            "exam": ex, "subject": sub, "condition": cond,
+                            "mrp": int(mrp), "price": int(price), "seller_name": seller.strip(),
+                        }).execute()
+                        st.session_state.show_book_form = False
+                        st.success("Book listing saved to ReLoop.")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Could not save the listing. Check Supabase SQL. ({type(e).__name__})")
 
+    # Seller's active inventory appears below the books available to buy.
+    st.markdown("### My books for sale")
     try:
         my_listings = load_my_book_listings()
         my_requests = load_requests_for_listings([row["id"] for row in my_listings])
     except Exception as e:
         my_listings, my_requests = [], []
         st.error(f"Could not load your listings and requests. ({type(e).__name__})")
-
     counts = {}
     for request in my_requests:
         key = str(request["listing_id"])
         counts[key] = counts.get(key, 0) + 1
+    active_mine = [book for book in my_listings if book.get("status", "active") == "active"]
+    sold_mine = [book for book in my_listings if book.get("status") == "sold"]
 
-    with st.expander("My listings and requests"):
-        contact_form_key = "seller_contact_form"
-        with st.form(contact_form_key):
+    if not active_mine:
+        st.caption("You have no active book listings.")
+    for book in active_mine:
+        listing_id = str(book["id"])
+        name_col, sold_col = st.columns([5, 1.2], vertical_alignment="center")
+        name_col.markdown(
+            f"**{html.escape(book['title'])}** · ₹{int(book['price'])} · {counts.get(listing_id, 0)} request(s)"
+        )
+        if sold_col.button("Sold", key=f"sold_{listing_id}", use_container_width=True):
+            try:
+                db_client().rpc("mark_book_sold", {"p_listing_id": int(book["id"])}).execute()
+                st.success("Marked sold. It’s removed from active listings and you earned 100 ReLoop points.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Could not mark the book sold. Run the latest sales migration SQL. ({type(e).__name__})")
+
+    with st.expander("Contact details and sold-book history"):
+        with st.form("seller_contact_form"):
             st.write("Update the email and phone buyers receive after requesting one of your books.")
-            phone_update = st.text_input("Phone number", key="seller_phone_update")
+            phone_update = st.text_input("Phone number", placeholder="+91 98765 43210", key="seller_phone_update")
             contact_saved = st.form_submit_button("Save contact details")
         if contact_saved:
             if sum(ch.isdigit() for ch in phone_update) < 7:
@@ -928,29 +979,18 @@ with tab_books:
             else:
                 try:
                     db_client().table("user_profiles").upsert({
-                        "user_id": current_user["id"],
-                        "email": current_user["email"],
+                        "user_id": current_user["id"], "email": current_user["email"],
                         "phone": phone_update.strip(),
                     }, on_conflict="user_id").execute()
                     st.success("Contact details updated.")
                 except Exception as e:
                     st.error(f"Could not update contact details. ({type(e).__name__})")
-
-        if not my_listings:
-            st.caption("You haven’t listed any books yet.")
-        for book in my_listings:
-            listing_id = str(book["id"])
-            status = book.get("status", "active")
-            left, right = st.columns([4, 1])
-            left.write(f"**{book['title']}** · {status.title()} · {counts.get(listing_id, 0)} request(s)")
-            if status == "active" and right.button("Mark sold", key=f"sold_{listing_id}"):
-                try:
-                    db_client().table("book_listings").update({"status": "sold"}) \
-                        .eq("id", listing_id).eq("owner_id", current_user["id"]).execute()
-                    st.success("Marked sold. It’s removed from active listings.")
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Could not mark the book sold. ({type(e).__name__})")
+        if sold_mine:
+            st.markdown("**Sold books**")
+            for book in sold_mine:
+                st.caption(f"{book['title']} · Sold")
+        else:
+            st.caption("No sold books yet.")
 
 # Sound Check
 # ----------------------------------------------------------------------------
@@ -1011,6 +1051,9 @@ with tab_impact:
         scrap_rows = [r for r in records if r["kind"] == "scrap"]
         book_rows = [r for r in records if r["kind"] == "book_request"]
         audio_rows = [r for r in records if r["kind"] == "appliance"]
+        sale_rows = [r for r in records if r["kind"] == "book_sold"]
+        points_total = sum(int((r.get("details") or {}).get("points", 0)) for r in sale_rows)
+        sale_value_total = sum(float(r.get("amount") or 0) for r in sale_rows)
         kg_total = sum(float(r.get("kg") or 0) for r in scrap_rows)
         value_total = sum(float(r.get("amount") or 0) for r in scrap_rows)
         books_total = len(book_rows)
@@ -1024,13 +1067,19 @@ with tab_impact:
         st.error(f"Could not load your impact history. Run the Supabase setup SQL and check RLS policies. ({type(e).__name__})")
         kg_total = value_total = saved_total = 0
         books_total = 0
+        points_total = 0
+        sale_value_total = 0
+        sale_rows = []
         verdict_counts = {name: 0 for name in ("RESELL", "REPAIR", "SCRAP")}
 
-    k1, k2, k3, k4 = st.columns(4)
+    k1, k2, k3, k4, k5, k6, k7 = st.columns(7)
     k1.metric("Scrap valued", f"{kg_total:.1f} kg")
-    k2.metric("Fair value found", f"₹{value_total:,.0f}")
+    k2.metric("Scrap value", f"₹{value_total:,.0f}")
     k3.metric("Books requested", books_total)
     k4.metric("Saved by juniors", f"₹{saved_total:,.0f}")
+    k5.metric("Books sold", len(sale_rows))
+    k6.metric("Sale value", f"₹{sale_value_total:,.0f}")
+    k7.metric("ReLoop points", points_total)
 
     st.markdown("&nbsp;")
     st.markdown("**Appliance verdicts**")
