@@ -2,6 +2,7 @@
 ReLoop: Smart Circular Marketplace (Team Sutra, Ideathon 2026)
 Run locally:  streamlit run app.py
 """
+import base64
 import hashlib
 import html
 import io
@@ -38,11 +39,17 @@ def get_supabase_client():
 
 
 def render_brand(size=72):
-    logo_col, name_col = st.columns([1, 5], vertical_alignment="center")
-    with logo_col:
-        st.image("logo.png", width=size)
-    with name_col:
-        st.markdown("# ReLoop")
+    logo_path = os.path.join(os.path.dirname(__file__), "logo.png")
+    with open(logo_path, "rb") as logo_file:
+        logo_data = base64.b64encode(logo_file.read()).decode("ascii")
+    st.markdown(
+        f"""<div style="display:flex;align-items:center;gap:8px;margin:0 0 1rem 0">
+        <img src="data:image/png;base64,{logo_data}" style="width:{size}px;height:auto;display:block">
+        <span style="font-size:2.5rem;font-weight:750;line-height:1;color:#F4F7F5">ReLoop</span>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+
 
 def show_auth_gate():
     client = get_supabase_client()
@@ -837,4 +844,6 @@ with tab_impact:
     vdf = pd.DataFrame({"Verdict": list(ss.verdicts), "Count": list(ss.verdicts.values())}).set_index("Verdict")
     st.bar_chart(vdf, color=MARIGOLD, height=220)
     st.caption("Totals are for this session. Connect Supabase to keep them across visits.")
+
+
 
