@@ -39,17 +39,86 @@ def get_supabase_client():
     return st.session_state.supabase_client
 
 
-def render_brand(size=72):
+def render_brand(size=72, show_account=False):
     logo_path = os.path.join(os.path.dirname(__file__), "logo.png")
     with open(logo_path, "rb") as logo_file:
         logo_data = base64.b64encode(logo_file.read()).decode("ascii")
-    st.markdown(
-        f"""<div style="display:flex;align-items:center;gap:8px;margin:0 0 1rem 0">
-        <img src="data:image/png;base64,{logo_data}" style="width:{size}px;height:auto;display:block">
-        <span style="font-size:2.5rem;font-weight:750;line-height:1;color:#F4F7F5">ReLoop</span>
-        </div>""",
-        unsafe_allow_html=True,
-    )
+
+    if show_account:
+        brand_col, account_col = st.columns([7, 1.4], vertical_alignment="center")
+    else:
+        brand_col = st.container()
+        account_col = None
+
+    with brand_col:
+        st.markdown(
+            f"""<div style="display:flex;align-items:center;gap:8px;margin:0 0 1rem 0">
+            <img src="data:image/png;base64,{logo_data}" style="width:{size}px;height:auto;display:block">
+            <span style="font-size:2.5rem;font-weight:750;line-height:1;color:#F4F7F5">ReLoop</span>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+
+    if show_account and account_col is not None:
+        client = get_supabase_client()
+        token = st.session_state.get("auth_token")
+        if token:
+            client.postgrest.auth(token)
+        user_id = st.session_state.auth_user["id"]
+        email_now = st.session_state.auth_user["email"]
+        metadata = st.session_state.auth_user.get("metadata", {}) or {}
+        profile_error = False
+        try:
+            profile_rows = client.table("user_profiles").select("full_name, email, phone").eq(
+                "user_id", user_id
+            ).limit(1).execute().data or []
+        except Exception:
+            profile_rows = []
+            profile_error = True
+        profile = profile_rows[0] if profile_rows else {}
+        default_name = profile.get("full_name") or metadata.get("full_name") or email_now.split("@")[0]
+        default_phone = profile.get("phone") or st.session_state.auth_user.get("phone") or metadata.get("phone") or ""
+
+        with account_col:
+            with st.popover("👤 Account", use_container_width=True):
+                st.markdown("### Your account")
+                st.caption("Edit the details shown on your ReLoop account and book listings.")
+                if profile_error:
+                    st.warning("Run the latest Supabase account migration to enable profile editing.")
+                with st.form("account_profile_form"):
+                    new_name = st.text_input("Name", value=default_name, key="account_name")
+                    new_email = st.text_input("Email", value=email_now, key="account_email")
+                    new_phone = st.text_input("Phone number", value=default_phone, key="account_phone")
+                    save_profile = st.form_submit_button("Save changes", use_container_width=True)
+                if save_profile:
+                    if not new_name.strip():
+                        st.error("Enter your name.")
+                    elif "@" not in new_email or "." not in new_email.rsplit("@", 1)[-1]:
+                        st.error("Enter a valid email address.")
+                    elif sum(ch.isdigit() for ch in new_phone) < 7:
+                        st.error("Enter a valid phone number.")
+                    else:
+                        try:
+                            attrs = {"data": {"full_name": new_name.strip(), "phone": new_phone.strip()}}
+                            email_changed = new_email.strip().lower() != email_now.lower()
+                            if email_changed:
+                                attrs["email"] = new_email.strip()
+                            client.auth.update_user(attrs)
+                            client.table("user_profiles").upsert({
+                                "user_id": user_id,
+                                "email": email_now if email_changed else new_email.strip(),
+                                "full_name": new_name.strip(),
+                                "phone": new_phone.strip(),
+                            }, on_conflict="user_id").execute()
+                            st.session_state.auth_user["name"] = new_name.strip()
+                            st.session_state.auth_user["phone"] = new_phone.strip()
+                            if email_changed:
+                                st.info("Confirm the email change using the link sent by Supabase. Your current email remains active until confirmation.")
+                            else:
+                                st.success("Account details updated.")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Could not update your account. ({type(e).__name__})")
 
 
 def show_auth_gate():
@@ -86,7 +155,8 @@ def show_auth_gate():
                 metadata = getattr(result.user, "user_metadata", None) or {}
                 st.session_state.auth_user = {
                     "id": str(result.user.id), "email": result.user.email,
-                    "phone": metadata.get("phone"),
+                    "phone": metadata.get("phone"), "metadata": metadata,
+                    "name": metadata.get("full_name"),
                 }
                 st.session_state.auth_token = result.session.access_token
                 st.rerun()
@@ -95,6 +165,7 @@ def show_auth_gate():
 
     with signup_tab:
         with st.form("reloop_signup_form"):
+            full_name = st.text_input("Name", key="reloop_signup_name")
             email = st.text_input("Email", key="reloop_signup_email")
             phone = st.text_input("Phone number", placeholder="+91 98765 43210", key="reloop_signup_phone")
             password = st.text_input("Password (at least 8 characters)", type="password", key="reloop_signup_password")
@@ -105,6 +176,8 @@ def show_auth_gate():
                 st.error("The passwords do not match.")
             elif len(password) < 8:
                 st.error("Use a password with at least 8 characters.")
+            elif not full_name.strip():
+                st.error("Enter your name.")
             elif sum(ch.isdigit() for ch in phone) < 7:
                 st.error("Enter a valid phone number.")
             else:
@@ -112,25 +185,31 @@ def show_auth_gate():
                     result = client.auth.sign_up({
                         "email": email.strip(),
                         "password": password,
-                        "options": {"data": {"phone": phone.strip()}},
+                        "options": {"data": {"full_name": full_name.strip(), "phone": phone.strip()}},
                     })
                     if result.session:
                         st.session_state.auth_user = {
                             "id": str(result.user.id), "email": result.user.email,
-                            "phone": phone.strip(),
+                            "phone": phone.strip(), "name": full_name.strip(),
+                            "metadata": {"full_name": full_name.strip(), "phone": phone.strip()},
                         }
                         st.session_state.auth_token = result.session.access_token
                         st.rerun()
                     else:
                         st.success("Account created. Confirm your email, then return here and log in.")
-                except Exception:
-                    st.error("Signup failed. Check the email address and try again.")
+                except Exception as e:
+                    detail = str(e)
+                    lowered = detail.lower()
+                    if "already registered" in lowered or "already exists" in lowered:
+                        st.error("This email already has an account. Choose Log in, or use password reset.")
+                    else:
+                        st.error(f"Signup failed ({type(e).__name__}): {detail[:260]}")
 
     st.stop()
 
 
 current_user = show_auth_gate()
-render_brand(64)
+render_brand(64, show_account=True)
 
 # ----------------------------------------------------------------------------
 # Design tokens
