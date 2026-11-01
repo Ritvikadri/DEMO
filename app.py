@@ -304,6 +304,39 @@ def init_state():
 
 init_state()
 
+
+def db_client():
+    client = get_supabase_client()
+    token = st.session_state.get("auth_token")
+    if token:
+        client.postgrest.auth(token)
+    return client
+
+
+def load_book_listings():
+    return (db_client().table("book_listings").select("*")
+            .order("created_at", desc=True).execute().data or [])
+
+
+def load_book_requests():
+    return (db_client().table("book_requests").select("listing_id")
+            .eq("requester_id", current_user["id"]).execute().data or [])
+
+
+def add_impact_record(kind, kg=0, amount=0, details=None):
+    db_client().table("impact_records").insert({
+        "user_id": current_user["id"],
+        "kind": kind,
+        "kg": kg,
+        "amount": amount,
+        "details": details or {},
+    }).execute()
+
+
+def load_impact_records():
+    return (db_client().table("impact_records").select("kind, kg, amount, details, created_at")
+            .eq("user_id", current_user["id"]).execute().data or [])
+
 # ----------------------------------------------------------------------------
 # Helpers
 # ----------------------------------------------------------------------------
@@ -709,9 +742,14 @@ with tab_scrap:
         )
     st.caption("Dealer names, locations and offers are sample data for the demo.")
     if st.button("Save to my impact", key="save_scrap") and fair > 0:
-        st.session_state.kg_valued += kg
-        st.session_state.rupees_valued += fair
-        st.toast("Saved. You can see it on the Impact tab.")
+        try:
+            add_impact_record(
+                "scrap", kg=kg, amount=fair,
+                details={"materials": df.to_dict(orient="records")},
+            )
+            st.toast("Saved to your account. You can see it on the Impact tab.")
+        except Exception as e:
+            st.error(f"Could not save impact data. Run the Supabase setup SQL first. ({type(e).__name__})")
 
 # ----------------------------------------------------------------------------
 # Book Loop
@@ -723,39 +761,56 @@ with tab_books:
     subject = f2.selectbox("Subject", ["All", "Physics", "Chemistry", "Maths", "Biology"])
     q = f3.text_input("Search by title", placeholder="e.g. HC Verma")
 
+    try:
+        listings = load_book_listings()
+        requested_ids = {str(row["listing_id"]) for row in load_book_requests()}
+    except Exception as e:
+        listings, requested_ids = [], set()
+        st.error(f"Could not load book listings. Run the Supabase setup SQL and check RLS policies. ({type(e).__name__})")
+
     shown = [
-        b for b in st.session_state.books
-        if (exam == "All" or b["exam"] == exam)
-        and (subject == "All" or b["subject"] == subject)
-        and q.lower() in b["title"].lower()
+        row for row in listings
+        if (exam == "All" or row["exam"] == exam)
+        and (subject == "All" or row["subject"] == subject)
+        and q.lower() in row["title"].lower()
     ]
     if not shown:
-        st.info("No books match. Try clearing a filter, or list the book you are looking for below.")
+        st.info("No book listings match yet. Add a book below; saved listings will appear here for everyone signed in.")
 
     for row_start in range(0, len(shown), 3):
         cols = st.columns(3, gap="medium")
-        for c, b in zip(cols, shown[row_start:row_start + 3]):
+        for c, book in zip(cols, shown[row_start:row_start + 3]):
             with c:
-                saving = b["mrp"] - b["price"]
-                accent = {"Physics": MARIGOLD, "Chemistry": MINT, "Maths": CORAL, "Biology": "#9DB7FF"}.get(b["subject"], MARIGOLD)
+                saving = int(book["mrp"]) - int(book["price"])
+                accent = {"Physics": MARIGOLD, "Chemistry": MINT, "Maths": CORAL, "Biology": "#9DB7FF"}.get(book["subject"], MARIGOLD)
+                cnd = html.escape(book["condition"])
+                cexam = html.escape(book["exam"])
+                csubject = html.escape(book["subject"])
                 st.markdown(
-                    f"""<div class="rl-card" style="border-top:3px solid {accent}"><h4>{html.escape(b['title'])}</h4>
-                    <div class="rl-meta">Listed by {html.escape(b['seller'])}</div>
-                    <div style="margin:10px 0 2px 0"><span class="rl-price">₹{b['price']}</span>
-                    <span class="rl-strike">₹{b['mrp']}</span></div>
+                    f"""<div class="rl-card" style="border-top:3px solid {accent}"><h4>{html.escape(book['title'])}</h4>
+                    <div class="rl-meta">Listed by {html.escape(book['seller_name'])}</div>
+                    <div style="margin:10px 0 2px 0"><span class="rl-price">₹{int(book['price'])}</span>
+                    <span class="rl-strike">₹{int(book['mrp'])}</span></div>
                     <div class="rl-meta">You save ₹{saving}</div>
-                    <span class="rl-tag">{b['exam']}</span><span class="rl-tag">{b['subject']}</span>
-                    <span class="rl-tag">{b['cond']}</span></div>""",
+                    <span class="rl-tag">{cexam}</span><span class="rl-tag">{csubject}</span>
+                    <span class="rl-tag">{cnd}</span></div>""",
                     unsafe_allow_html=True,
                 )
-                if b["requested"]:
-                    st.button("Requested", key=f"req{b['id']}", disabled=True)
-                elif st.button("Request this book", key=f"req{b['id']}"):
-                    b["requested"] = True
-                    st.session_state.books_passed += 1
-                    st.session_state.rupees_saved += saving
-                    st.toast(f"Requested. {b['seller']} will confirm pickup or delivery.")
-                    st.rerun()
+                listing_id = str(book["id"])
+                if str(book["owner_id"]) == current_user["id"]:
+                    st.caption("Your listing")
+                elif listing_id in requested_ids:
+                    st.button("Request sent", key=f"req_{listing_id}", disabled=True)
+                elif st.button("Request this book", key=f"req_{listing_id}"):
+                    try:
+                        db_client().table("book_requests").insert({
+                            "listing_id": listing_id, "requester_id": current_user["id"]
+                        }).execute()
+                        add_impact_record("book_request", amount=saving, details={"listing_id": listing_id})
+                        st.success(f"Request sent to {book['seller_name']}.")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Could not send this request. ({type(e).__name__})")
 
     st.markdown("&nbsp;")
     with st.expander("List a book you no longer need"):
@@ -769,18 +824,22 @@ with tab_books:
             cond = c3.selectbox("Condition", ["Like new", "Good", "Fair"])
             mrp = c4.number_input("Original price (₹)", min_value=50, value=500, step=10)
             price = st.slider("Your price (₹)", 10, int(mrp), int(mrp * 0.4))
-            if st.form_submit_button("List this book"):
-                if title.strip() and seller.strip():
-                    st.session_state.books.insert(0, dict(
-                        id=max(x["id"] for x in st.session_state.books) + 1, title=title.strip(),
-                        exam=ex, subject=sub, cond=cond, mrp=int(mrp), price=int(price),
-                        seller=seller.strip(), requested=False))
-                    st.success("Listed. Juniors can now find it.")
+            submitted = st.form_submit_button("List this book")
+        if submitted:
+            if not title.strip() or not seller.strip():
+                st.error("Add the book title and your name to list it.")
+            else:
+                try:
+                    db_client().table("book_listings").insert({
+                        "owner_id": current_user["id"], "title": title.strip(),
+                        "exam": ex, "subject": sub, "condition": cond,
+                        "mrp": int(mrp), "price": int(price), "seller_name": seller.strip(),
+                    }).execute()
+                    st.success("Book listing saved to the ReLoop database.")
                     st.rerun()
-                else:
-                    st.error("Add the book title and your name to list it.")
+                except Exception as e:
+                    st.error(f"Could not save the listing. Run the Supabase setup SQL first. ({type(e).__name__})")
 
-# ----------------------------------------------------------------------------
 # Sound Check
 # ----------------------------------------------------------------------------
 with tab_sound:
@@ -816,8 +875,11 @@ with tab_sound:
                 m2.metric("Sound cleanliness", f"{max(0, 100 - res['flat'] * 250):.0f}%")
                 m3.metric("Rattle", f"{res['hf'] * 100:.0f}%")
                 if st.button("Save this verdict", key="save_sound"):
-                    st.session_state.verdicts[label] += 1
-                    st.toast("Verdict saved to Impact.")
+                    try:
+                        add_impact_record("appliance", details={"verdict": label, "appliance": appliance})
+                        st.toast("Verdict saved to your account.")
+                    except Exception as e:
+                        st.error(f"Could not save the verdict. Run the Supabase setup SQL first. ({type(e).__name__})")
             except Exception:
                 st.error("Could not read this audio. Record again, or upload a WAV file (16-bit).")
 
@@ -832,19 +894,34 @@ with tab_sound:
 # ----------------------------------------------------------------------------
 with tab_impact:
     st.subheader("What you have kept in use")
-    ss = st.session_state
+    try:
+        records = load_impact_records()
+        scrap_rows = [r for r in records if r["kind"] == "scrap"]
+        book_rows = [r for r in records if r["kind"] == "book_request"]
+        audio_rows = [r for r in records if r["kind"] == "appliance"]
+        kg_total = sum(float(r.get("kg") or 0) for r in scrap_rows)
+        value_total = sum(float(r.get("amount") or 0) for r in scrap_rows)
+        books_total = len(book_rows)
+        saved_total = sum(float(r.get("amount") or 0) for r in book_rows)
+        verdict_counts = {name: 0 for name in ("RESELL", "REPAIR", "SCRAP")}
+        for record in audio_rows:
+            verdict = (record.get("details") or {}).get("verdict")
+            if verdict in verdict_counts:
+                verdict_counts[verdict] += 1
+    except Exception as e:
+        st.error(f"Could not load your impact history. Run the Supabase setup SQL and check RLS policies. ({type(e).__name__})")
+        kg_total = value_total = saved_total = 0
+        books_total = 0
+        verdict_counts = {name: 0 for name in ("RESELL", "REPAIR", "SCRAP")}
+
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Scrap valued", f"{ss.kg_valued:.1f} kg")
-    k2.metric("Fair value found", f"₹{ss.rupees_valued:,.0f}")
-    k3.metric("Books passed on", ss.books_passed)
-    k4.metric("Saved by juniors", f"₹{ss.rupees_saved:,}")
+    k1.metric("Scrap valued", f"{kg_total:.1f} kg")
+    k2.metric("Fair value found", f"₹{value_total:,.0f}")
+    k3.metric("Books requested", books_total)
+    k4.metric("Saved by juniors", f"₹{saved_total:,.0f}")
 
     st.markdown("&nbsp;")
     st.markdown("**Appliance verdicts**")
-    vdf = pd.DataFrame({"Verdict": list(ss.verdicts), "Count": list(ss.verdicts.values())}).set_index("Verdict")
+    vdf = pd.DataFrame({"Verdict": list(verdict_counts), "Count": list(verdict_counts.values())}).set_index("Verdict")
     st.bar_chart(vdf, color=MARIGOLD, height=220)
-    st.caption("Totals are for this session. Connect Supabase to keep them across visits.")
-
-
-
-
+    st.caption("Your totals are saved to your ReLoop account.")
