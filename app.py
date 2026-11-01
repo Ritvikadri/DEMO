@@ -315,12 +315,32 @@ def db_client():
 
 def load_book_listings():
     return (db_client().table("book_listings").select("*")
-            .order("created_at", desc=True).execute().data or [])
+            .eq("status", "active").order("created_at", desc=True).execute().data or [])
+
+
+def load_my_book_listings():
+    return (db_client().table("book_listings").select("*")
+            .eq("owner_id", current_user["id"]).order("created_at", desc=True).execute().data or [])
 
 
 def load_book_requests():
     return (db_client().table("book_requests").select("listing_id")
             .eq("requester_id", current_user["id"]).execute().data or [])
+
+
+def load_requests_for_listings(listing_ids):
+    if not listing_ids:
+        return []
+    return (db_client().table("book_requests").select("listing_id, requester_id, created_at")
+            .in_("listing_id", listing_ids).execute().data or [])
+
+
+def load_contact_profiles(user_ids):
+    if not user_ids:
+        return {}
+    rows = (db_client().table("user_profiles").select("user_id, email, phone")
+            .in_("user_id", list(user_ids)).execute().data or [])
+    return {str(row["user_id"]): row for row in rows}
 
 
 def add_impact_record(kind, kg=0, amount=0, details=None):
@@ -764,9 +784,14 @@ with tab_books:
     try:
         listings = load_book_listings()
         requested_ids = {str(row["listing_id"]) for row in load_book_requests()}
+        owners_to_contact = {
+            str(book["owner_id"]) for book in listings
+            if str(book["id"]) in requested_ids
+        }
+        contact_by_owner = load_contact_profiles(owners_to_contact)
     except Exception as e:
-        listings, requested_ids = [], set()
-        st.error(f"Could not load book listings. Run the Supabase setup SQL and check RLS policies. ({type(e).__name__})")
+        listings, requested_ids, contact_by_owner = [], set(), {}
+        st.error(f"Could not load book listings or contacts. Check the latest Supabase SQL and RLS policies. ({type(e).__name__})")
 
     shown = [
         row for row in listings
@@ -797,17 +822,23 @@ with tab_books:
                     unsafe_allow_html=True,
                 )
                 listing_id = str(book["id"])
-                if str(book["owner_id"]) == current_user["id"]:
-                    st.caption("Your listing")
+                owner_id = str(book["owner_id"])
+                if owner_id == current_user["id"]:
+                    st.caption("Your listing — manage it under My listings below.")
                 elif listing_id in requested_ids:
                     st.button("Request sent", key=f"req_{listing_id}", disabled=True)
+                    contact = contact_by_owner.get(owner_id)
+                    if contact:
+                        st.info(f"Owner contact — {contact.get('email') or 'email unavailable'} · {contact.get('phone') or 'phone not added'}")
+                    else:
+                        st.warning("Your request is saved, but the owner’s contact profile is unavailable. Please try again later.")
                 elif st.button("Request this book", key=f"req_{listing_id}"):
                     try:
                         db_client().table("book_requests").insert({
                             "listing_id": listing_id, "requester_id": current_user["id"]
                         }).execute()
                         add_impact_record("book_request", amount=saving, details={"listing_id": listing_id})
-                        st.success(f"Request sent to {book['seller_name']}.")
+                        st.success("Request sent. The owner’s email and phone will appear on this listing.")
                         st.rerun()
                     except Exception as e:
                         st.error(f"Could not send this request. ({type(e).__name__})")
@@ -818,6 +849,7 @@ with tab_books:
             a, b_ = st.columns(2)
             title = a.text_input("Title")
             seller = b_.text_input("Your name")
+            phone = st.text_input("Phone number shown after a book request", placeholder="Include country code if possible")
             c1, c2, c3, c4 = st.columns(4)
             ex = c1.selectbox("Exam", ["JEE", "NEET", "Boards"])
             sub = c2.selectbox("Subject", ["Physics", "Chemistry", "Maths", "Biology"])
@@ -826,10 +858,18 @@ with tab_books:
             price = st.slider("Your price (₹)", 10, int(mrp), int(mrp * 0.4))
             submitted = st.form_submit_button("List this book")
         if submitted:
+            digit_count = sum(ch.isdigit() for ch in phone)
             if not title.strip() or not seller.strip():
                 st.error("Add the book title and your name to list it.")
+            elif digit_count < 7:
+                st.error("Enter a valid phone number so buyers can contact you after requesting.")
             else:
                 try:
+                    db_client().table("user_profiles").upsert({
+                        "user_id": current_user["id"],
+                        "email": current_user["email"],
+                        "phone": phone.strip(),
+                    }, on_conflict="user_id").execute()
                     db_client().table("book_listings").insert({
                         "owner_id": current_user["id"], "title": title.strip(),
                         "exam": ex, "subject": sub, "condition": cond,
@@ -838,7 +878,55 @@ with tab_books:
                     st.success("Book listing saved to the ReLoop database.")
                     st.rerun()
                 except Exception as e:
-                    st.error(f"Could not save the listing. Run the Supabase setup SQL first. ({type(e).__name__})")
+                    st.error(f"Could not save the listing. Check the latest Supabase SQL. ({type(e).__name__})")
+
+    try:
+        my_listings = load_my_book_listings()
+        my_requests = load_requests_for_listings([row["id"] for row in my_listings])
+    except Exception as e:
+        my_listings, my_requests = [], []
+        st.error(f"Could not load your listings and requests. ({type(e).__name__})")
+
+    counts = {}
+    for request in my_requests:
+        key = str(request["listing_id"])
+        counts[key] = counts.get(key, 0) + 1
+
+    with st.expander("My listings and requests"):
+        contact_form_key = "seller_contact_form"
+        with st.form(contact_form_key):
+            st.write("Update the email and phone buyers receive after requesting one of your books.")
+            phone_update = st.text_input("Phone number", key="seller_phone_update")
+            contact_saved = st.form_submit_button("Save contact details")
+        if contact_saved:
+            if sum(ch.isdigit() for ch in phone_update) < 7:
+                st.error("Enter a valid phone number.")
+            else:
+                try:
+                    db_client().table("user_profiles").upsert({
+                        "user_id": current_user["id"],
+                        "email": current_user["email"],
+                        "phone": phone_update.strip(),
+                    }, on_conflict="user_id").execute()
+                    st.success("Contact details updated.")
+                except Exception as e:
+                    st.error(f"Could not update contact details. ({type(e).__name__})")
+
+        if not my_listings:
+            st.caption("You haven’t listed any books yet.")
+        for book in my_listings:
+            listing_id = str(book["id"])
+            status = book.get("status", "active")
+            left, right = st.columns([4, 1])
+            left.write(f"**{book['title']}** · {status.title()} · {counts.get(listing_id, 0)} request(s)")
+            if status == "active" and right.button("Mark sold", key=f"sold_{listing_id}"):
+                try:
+                    db_client().table("book_listings").update({"status": "sold"}) \
+                        .eq("id", listing_id).eq("owner_id", current_user["id"]).execute()
+                    st.success("Marked sold. It’s removed from active listings.")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Could not mark the book sold. ({type(e).__name__})")
 
 # Sound Check
 # ----------------------------------------------------------------------------
