@@ -847,8 +847,11 @@ with tab_books:
                         else:
                             actions[0].caption("WhatsApp link unavailable: owner needs to add a full phone number with country code.")
                         if owner_email:
-                            mailto = f"mailto:{quote(owner_email, safe='@.')}?{urlencode({'subject': subject, 'body': message})}"
-                            actions[1].link_button("Email the owner", mailto, use_container_width=True)
+                            gmail_url = (
+                                "https://mail.google.com/mail/?view=cm&fs=1&"
+                                + urlencode({"to": owner_email, "su": subject, "body": message})
+                            )
+                            actions[1].link_button("Compose email", gmail_url, use_container_width=True)
                         else:
                             actions[1].caption("Email draft unavailable: owner email is missing.")
                     else:
