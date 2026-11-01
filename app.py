@@ -19,6 +19,88 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="ReLoop", page_icon="♻️", layout="wide")
+# ----------------------------------------------------------------------------
+# Supabase authentication gate: show login/signup before the ReLoop app.
+# Keep one client per Streamlit browser session so users do not share auth state.
+# ----------------------------------------------------------------------------
+from supabase import create_client
+
+
+def get_supabase_client():
+    if "supabase_client" not in st.session_state:
+        url = st.secrets.get("SUPABASE_URL", "")
+        key = st.secrets.get("SUPABASE_KEY", st.secrets.get("SUPABASE_PUBLISHABLE_KEY", ""))
+        if not url or not key:
+            st.error("Supabase is not configured. Add SUPABASE_URL and SUPABASE_KEY to Streamlit secrets.")
+            st.stop()
+        st.session_state.supabase_client = create_client(url, key)
+    return st.session_state.supabase_client
+
+
+def show_auth_gate():
+    client = get_supabase_client()
+    user = st.session_state.get("auth_user")
+
+    if user:
+        st.sidebar.caption(f"Signed in: {user['email']}")
+        if st.sidebar.button("Log out", key="auth_logout"):
+            try:
+                client.auth.sign_out()
+            finally:
+                for key in ("auth_user", "auth_token", "supabase_client"):
+                    st.session_state.pop(key, None)
+                st.rerun()
+        # Attach this user's JWT to database API calls so RLS sees the user.
+        token = st.session_state.get("auth_token")
+        if token:
+            client.postgrest.auth(token)
+        return user
+
+    st.title("♻️ ReLoop")
+    st.subheader("Welcome — log in or create an account")
+    login_tab, signup_tab = st.tabs(["Log in", "Sign up"])
+
+    with login_tab:
+        with st.form("reloop_login_form"):
+            email = st.text_input("Email", key="reloop_login_email")
+            password = st.text_input("Password", type="password", key="reloop_login_password")
+            submitted = st.form_submit_button("Log in", use_container_width=True)
+        if submitted:
+            try:
+                result = client.auth.sign_in_with_password({"email": email.strip(), "password": password})
+                st.session_state.auth_user = {"id": str(result.user.id), "email": result.user.email}
+                st.session_state.auth_token = result.session.access_token
+                st.rerun()
+            except Exception:
+                st.error("Login failed. Check your email and password, then try again.")
+
+    with signup_tab:
+        with st.form("reloop_signup_form"):
+            email = st.text_input("Email", key="reloop_signup_email")
+            password = st.text_input("Password (at least 8 characters)", type="password", key="reloop_signup_password")
+            confirm = st.text_input("Confirm password", type="password", key="reloop_signup_confirm")
+            submitted = st.form_submit_button("Create account", use_container_width=True)
+        if submitted:
+            if password != confirm:
+                st.error("The passwords do not match.")
+            elif len(password) < 8:
+                st.error("Use a password with at least 8 characters.")
+            else:
+                try:
+                    result = client.auth.sign_up({"email": email.strip(), "password": password})
+                    if result.session:
+                        st.session_state.auth_user = {"id": str(result.user.id), "email": result.user.email}
+                        st.session_state.auth_token = result.session.access_token
+                        st.rerun()
+                    else:
+                        st.success("Account created. Confirm your email, then return here and log in.")
+                except Exception:
+                    st.error("Signup failed. Check the email address and try again.")
+
+    st.stop()
+
+
+current_user = show_auth_gate()
 
 # ----------------------------------------------------------------------------
 # Design tokens
