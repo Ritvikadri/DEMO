@@ -11,6 +11,7 @@ import math
 import os
 import time
 import wave
+from urllib.parse import quote, urlencode
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 
@@ -829,7 +830,27 @@ with tab_books:
                     st.button("Request sent", key=f"req_{listing_id}", disabled=True)
                     contact = contact_by_owner.get(owner_id)
                     if contact:
-                        st.info(f"Owner contact — {contact.get('email') or 'email unavailable'} · {contact.get('phone') or 'phone not added'}")
+                        owner_email = (contact.get("email") or "").strip()
+                        owner_phone = (contact.get("phone") or "").strip()
+                        st.info(f"Owner contact — {owner_email or 'email unavailable'} · {owner_phone or 'phone not added'}")
+                        message = (
+                            f"Hi {book['seller_name']}, I’m interested in your book, "
+                            f"{book['title']}, listed on ReLoop for ₹{int(book['price'])}. "
+                            "Is it still available? Could we discuss pickup or delivery?"
+                        )
+                        subject = f"ReLoop book request: {book['title']}"
+                        actions = st.columns(2)
+                        phone_digits = "".join(ch for ch in owner_phone if ch.isdigit())
+                        if len(phone_digits) >= 10:
+                            wa_url = f"https://wa.me/{phone_digits}?text={quote(message, safe='')}"
+                            actions[0].link_button("Message on WhatsApp", wa_url, use_container_width=True)
+                        else:
+                            actions[0].caption("WhatsApp link unavailable: owner needs to add a full phone number with country code.")
+                        if owner_email:
+                            mailto = f"mailto:{quote(owner_email, safe='@.')}?{urlencode({'subject': subject, 'body': message})}"
+                            actions[1].link_button("Email the owner", mailto, use_container_width=True)
+                        else:
+                            actions[1].caption("Email draft unavailable: owner email is missing.")
                     else:
                         st.warning("Your request is saved, but the owner’s contact profile is unavailable. Please try again later.")
                 elif st.button("Request this book", key=f"req_{listing_id}"):
@@ -849,7 +870,7 @@ with tab_books:
             a, b_ = st.columns(2)
             title = a.text_input("Title")
             seller = b_.text_input("Your name")
-            phone = st.text_input("Phone number shown after a book request", placeholder="Include country code if possible")
+            phone = st.text_input("Phone number shown after a book request", placeholder="+91 98765 43210", help="Use the full international format, including country code, for the WhatsApp link.")
             c1, c2, c3, c4 = st.columns(4)
             ex = c1.selectbox("Exam", ["JEE", "NEET", "Boards"])
             sub = c2.selectbox("Subject", ["Physics", "Chemistry", "Maths", "Biology"])
