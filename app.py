@@ -168,18 +168,18 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-chip {{ background: rgba(255,255,255,.05); border: 1px solid {LINE}; border-radius: 12px; padding: 8px 14px; font-size: .92rem; color: {TEXT}; }}
 .rl-chip b {{ color: {MARIGOLD}; font-weight: 700; }}
 
-/* rate board: the one memorable element */
-.rl-board {{ --prox: 0; background: #07110F; border-radius: 20px; padding: 22px 24px;
-  border: 1px solid rgba(calc(70 + var(--prox) * 144), calc(110 + var(--prox) * 28), calc(100 - var(--prox) * 100), calc(.45 + var(--prox) * .55));
+/* Rate board: yellow glow brightens and spreads as the pointer approaches. */
+.rl-board {{ --prox: 0; position: relative; background: #07110F; border-radius: 20px; padding: 22px 24px;
+  border: none;
   box-shadow:
-    0 0 0 calc(7px + var(--prox) * 3px) rgba(calc(242 - var(--prox) * 28), calc(177 - var(--prox) * 39), calc(56 - var(--prox) * 56), calc(.06 + var(--prox) * .62)),
-    0 24px 60px -24px rgba(calc(242 - var(--prox) * 28), calc(177 - var(--prox) * 39), 0, calc(.35 + var(--prox) * .5)); }}
-.rl-board h4 {{ margin: 0 0 12px 0; color: {MARIGOLD}; font-family: 'Bricolage Grotesque'; font-size: 1.1rem; font-weight: 700; display:flex; align-items:center; gap:10px; }}
+    0 0 calc(18px + var(--prox) * 68px) rgba(242, 177, 56, calc(.12 + var(--prox) * .62)),
+    0 12px calc(36px + var(--prox) * 110px) rgba(242, 177, 56, calc(.10 + var(--prox) * .44));
+  transition: box-shadow .18s ease; }}
+.rl-board h4 {{ margin: 0 0 12px 0; filter: brightness(calc(1 + var(--prox) * .45)); color: {MARIGOLD}; font-family: 'Bricolage Grotesque'; font-size: 1.1rem; font-weight: 700; display:flex; align-items:center; gap:10px; }}
 .rl-dot {{ width:9px; height:9px; border-radius:50%; background:{MINT}; box-shadow: 0 0 10px {MINT}; }}
 .rl-row {{ display:flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px dashed #2A4A45; color: #DCE8E4; font-size: 1rem; }}
 .rl-row:last-child {{ border-bottom: 0; }}
-.rl-row b {{ color: {MARIGOLD}; font-weight: 700; font-variant-numeric: tabular-nums; }}
-
+.rl-row b {{ filter: brightness(calc(1 + var(--prox) * .45)); color: {MARIGOLD}; font-weight: 700; font-variant-numeric: tabular-nums; }}
 /* ticker */
 .rl-ticker {{ overflow: hidden; margin: 18px 0 8px 0; border-top: 1px solid {LINE}; border-bottom: 1px solid {LINE}; padding: 11px 0; }}
 .rl-track {{ display:inline-flex; gap: 46px; white-space: nowrap; animation: rl-scroll 46s linear infinite; color: {MUTE}; font-size: .95rem; }}
@@ -844,6 +844,7 @@ with tab_impact:
     vdf = pd.DataFrame({"Verdict": list(ss.verdicts), "Count": list(ss.verdicts.values())}).set_index("Verdict")
     st.bar_chart(vdf, color=MARIGOLD, height=220)
     st.caption("Totals are for this session. Connect Supabase to keep them across visits.")
+
 
 
 
