@@ -83,6 +83,8 @@ def render_brand(size=72, show_account=False):
         profile = profile_rows[0] if profile_rows else {}
         default_name = profile.get("full_name") or metadata.get("full_name") or email_now.split("@")[0]
         default_phone = profile.get("phone") or st.session_state.auth_user.get("phone") or metadata.get("phone") or ""
+        # Keep the account's saved display name available to listings and requests.
+        st.session_state.auth_user["name"] = default_name
 
         with account_col:
             account_logo_col, account_menu_col = st.columns([0.32, 1.5], vertical_alignment="center")
@@ -1266,9 +1268,7 @@ if active_section == "Book Loop":
         with st.container(border=True):
             st.markdown("#### List a book for sale")
             with st.form("add_book", clear_on_submit=True):
-                a, b_ = st.columns(2)
-                title = a.text_input("Book title")
-                seller = b_.text_input("Your name")
+                title = st.text_input("Book title")
                 c1, c2, c3, c4 = st.columns(4)
                 ex = c1.selectbox("Exam / category", book_exams)
                 sub = c2.selectbox("Subject", book_subjects)
@@ -1277,8 +1277,15 @@ if active_section == "Book Loop":
                 price = st.slider("Your price (₹)", 10, int(mrp), int(mrp * 0.4))
                 publish = st.form_submit_button("Publish listing")
             if publish:
-                if not title.strip() or not seller.strip():
-                    st.error("Add the book title and your name.")
+                seller_name = (
+                    current_user.get("name")
+                    or (current_user.get("metadata") or {}).get("full_name")
+                    or str(current_user.get("email") or "").split("@")[0]
+                ).strip()
+                if not title.strip():
+                    st.error("Add the book title.")
+                elif not seller_name:
+                    st.error("Add your name under Account before listing a book.")
                 else:
                     try:
                         saved_phone = current_user.get("phone")
@@ -1295,7 +1302,7 @@ if active_section == "Book Loop":
                         db_client().table("book_listings").insert({
                             "owner_id": current_user["id"], "title": title.strip(),
                             "exam": ex, "subject": sub, "condition": cond,
-                            "mrp": int(mrp), "price": int(price), "seller_name": seller.strip(),
+                            "mrp": int(mrp), "price": int(price), "seller_name": seller_name,
                         }).execute()
                         st.session_state.show_book_form = False
                         st.success("Book listing saved to ReLoop.")
