@@ -287,6 +287,29 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-flow b {{ display:block; font-family:'Bricolage Grotesque'; font-size: 1.08rem; color: {TEXT}; }}
 .rl-flow span {{ color: {MUTE}; font-size: .9rem; }}
 
+/* ---------- dealer cards: equal size, button pinned to the bottom ---------- */
+.rl-dealer-grid {{ display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; align-items: stretch; margin: 6px 0 14px 0; }}
+.rl-dealer {{ box-sizing: border-box; display: flex; flex-direction: column; min-height: 340px; padding: 22px 22px 20px 22px;
+  background: linear-gradient(180deg, {SURFACE2} 0%, {SURFACE} 100%); border: 1px solid {LINE}; border-radius: 20px;
+  box-shadow: 0 18px 40px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.04);
+  transition: transform .18s ease, border-color .18s ease; }}
+.rl-dealer:hover {{ transform: translateY(-3px); border-color: #3B6A63; }}
+.rl-dealer h4 {{ margin: 0 0 6px 0; min-height: 2.5em; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.12rem; color: {TEXT}; line-height: 1.25; }}
+.rl-dealer-tags {{ display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 18px 0; }}
+.rl-dealer-tags .rl-tag {{ margin: 0; }}
+.rl-wa-btn {{ margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center;
+  text-decoration: none !important; padding: 12px 14px; border-radius: 12px; font-weight: 700; font-size: .95rem;
+  color: #062B1A !important; background: linear-gradient(135deg, #4BE08C, #25D366);
+  box-shadow: 0 10px 24px -12px rgba(37,211,102,.7); transition: transform .12s ease, filter .12s ease; }}
+.rl-wa-btn::before {{ content: "💬"; }}
+.rl-wa-btn:hover {{ filter: brightness(1.07); transform: translateY(-1px); color: #062B1A !important; }}
+@media (max-width: 1000px) {{ .rl-dealer-grid {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }} }}
+@media (max-width: 560px) {{
+  .rl-dealer-grid {{ grid-template-columns: 1fr; }}
+  .rl-dealer {{ min-height: 0; }}
+  .rl-dealer h4 {{ min-height: 0; }}
+}}
+
 /* ---------- cards ---------- */
 .rl-card {{ background: linear-gradient(180deg, {SURFACE2} 0%, {SURFACE} 100%); border: 1px solid {LINE}; border-radius: 20px;
   padding: 20px 22px; height: 100%; box-shadow: 0 18px 40px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.04);
@@ -485,11 +508,13 @@ AREAS = {
     "Jayanagar": (12.9308, 77.5838),
 }
 
-DEALERS = [  # name, lat, lon, share of fair rate offered, speciality
-    ("Ramesh Traders", 12.9140, 77.5600, 0.88, "Paper, plastic"),
-    ("Shree Metals", 12.9230, 77.5530, 0.95, "Metals, e-waste"),
-    ("Lakshmi Scrap Centre", 12.9010, 77.5900, 0.82, "All household scrap"),
-    ("Basavanna Recyclers", 12.9300, 77.5800, 0.91, "Paper, cardboard, glass"),
+DEMO_DEALER_PHONE = "+917625016830"  # placeholder: every kabadiwala uses this number for now
+
+DEALERS = [  # name, lat, lon, share of fair rate offered, speciality, WhatsApp phone
+    ("Ramesh Traders", 12.9140, 77.5600, 0.88, "Paper, plastic", DEMO_DEALER_PHONE),
+    ("Shree Metals", 12.9230, 77.5530, 0.95, "Metals, e-waste", DEMO_DEALER_PHONE),
+    ("Lakshmi Scrap Centre", 12.9010, 77.5900, 0.82, "All household scrap", DEMO_DEALER_PHONE),
+    ("Basavanna Recyclers", 12.9300, 77.5800, 0.91, "Paper, cardboard, glass", DEMO_DEALER_PHONE),
 ]
 
 SEED_BOOKS = [
@@ -784,6 +809,27 @@ def verdict_for(fault, silent):
     return "SCRAP", "#7A3B2E|#B5503A", "Rough, unstable sound. Sell it for parts or metal."
 
 
+def whatsapp_url(phone, message):
+    """Opens a WhatsApp chat with the message already typed in. wa.me needs digits only, no + sign."""
+    digits = "".join(ch for ch in str(phone) if ch.isdigit())
+    return f"https://wa.me/{digits}?text={quote(message, safe='')}"
+
+
+def pickup_message(dealer, user_name, area, items, kg, fair):
+    """Personalised pickup request: who is asking, where, what scrap, how much, and ReLoop's fair value."""
+    parts = [f"{m} {w:.1f} kg" for m, w in items if w > 0]
+    lines = [f"Hello {dealer}, this is {user_name or 'a ReLoop user'} from {area}."]
+    if kg > 0 and parts:
+        lines.append(f"I have about {kg:.1f} kg of scrap ready to sell: {', '.join(parts)}.")
+    else:
+        lines.append("I have some scrap ready to sell.")
+    if fair > 0:
+        lines.append(f"ReLoop estimates its fair value at ₹{fair * 0.9:,.0f} to ₹{fair * 1.1:,.0f}.")
+    lines.append("Could you please come for a pickup? Let me know a time that suits you.")
+    lines.append("Sent via ReLoop")
+    return "\n".join(lines)
+
+
 # ----------------------------------------------------------------------------
 # Hero (shown at the top of the Scrap Vision tab, under the main navigation)
 # ----------------------------------------------------------------------------
@@ -968,22 +1014,29 @@ with tab_scrap:
     area = st.selectbox("Your area", list(AREAS))
     me = AREAS[area]
     rows = []
-    for name, la, lo, share, spec in DEALERS:
-        rows.append(dict(name=name, km=haversine_km(me, (la, lo)), offer=fair * share, spec=spec, share=share))
+    for name, la, lo, share, spec, phone in DEALERS:
+        rows.append(dict(name=name, km=haversine_km(me, (la, lo)), offer=fair * share, spec=spec, share=share, phone=phone))
     rows.sort(key=lambda r: -r["offer"])
-    cols = st.columns(len(rows))
-    for i, (c, r) in enumerate(zip(cols, rows)):
-        best = "<span class='rl-tag best'>Best offer</span>" if i == 0 else ""
-        c.markdown(
-            f"""<div class="rl-card"><h4>{html.escape(r['name'])}</h4>
-            <div class="rl-meta">{r['km']:.1f} km away</div>
-            <div class="rl-price">₹{r['offer']:,.0f}</div>
-            <div class="rl-meta">{r['share']*100:.0f}% of fair value</div>
-            <div class="rl-bar"><i style="width:{r['share']*100:.0f}%"></i></div>
-            <span class="rl-tag">{html.escape(r['spec'])}</span>{best}</div>""",
-            unsafe_allow_html=True,
+
+    user_name = (current_user.get("name") or (current_user.get("metadata") or {}).get("full_name") or "").strip()
+    scrap_items = [(m, float(w)) for m, w in zip(df["Material"], df["Weight (kg)"])]
+    dealer_cards = []
+    for i, r in enumerate(rows):
+        best = '<span class="rl-tag best">Best offer</span>' if i == 0 else ""
+        wa_link = whatsapp_url(r["phone"], pickup_message(r["name"], user_name, area, scrap_items, kg, fair))
+        dealer_cards.append(
+            '<div class="rl-dealer">'
+            f'<h4>{html.escape(r["name"])}</h4>'
+            f'<div class="rl-meta">{r["km"]:.1f} km away</div>'
+            f'<div class="rl-price">₹{r["offer"]:,.0f}</div>'
+            f'<div class="rl-meta">{r["share"] * 100:.0f}% of fair value</div>'
+            f'<div class="rl-bar"><i style="width:{r["share"] * 100:.0f}%"></i></div>'
+            f'<div class="rl-dealer-tags"><span class="rl-tag">{html.escape(r["spec"])}</span>{best}</div>'
+            f'<a class="rl-wa-btn" href="{html.escape(wa_link, quote=True)}" target="_blank" rel="noopener noreferrer">Contact for pickup</a>'
+            '</div>'
         )
-    st.caption("Dealer names, locations and offers are sample data for the demo.")
+    st.markdown('<div class="rl-dealer-grid">' + "".join(dealer_cards) + '</div>', unsafe_allow_html=True)
+    st.caption("Dealer names, locations, offers and phone numbers are sample data for the demo.")
     if st.button("Save to my impact", key="save_scrap") and fair > 0:
         try:
             add_impact_record(
