@@ -474,49 +474,31 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
   .rl-workspace-bar {{ flex-direction: column; align-items: flex-start; gap: 4px; }}
 }}
 
-/* ---------- primary section navigation ---------- */
-.stTabs {{ margin: 0 0 30px; }}
-.stTabs [data-baseweb="tab-list"], div[data-testid="stTabs"] [role="tablist"] {{
-  box-sizing:border-box; width:fit-content !important; max-width:100% !important;
-  margin:0 auto !important; display:flex; justify-content:center !important; align-items:center; gap:8px;
-  border: 1px solid rgba(111,211,176,.13); border-radius: 18px;
-  background: linear-gradient(110deg, rgba(17,31,29,.94), rgba(13,25,23,.88));
-  box-shadow: 0 14px 36px -28px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.035);
-  padding: 8px; overflow-x:auto;
+/* ---------- centered, app-controlled section navigation ---------- */
+.st-key-nav_scrap_vision div.stButton > button, .st-key-nav_book_loop div.stButton > button,
+.st-key-nav_sound_check div.stButton > button, .st-key-nav_impact div.stButton > button {{
+  min-height:56px; padding:12px 18px; border-radius:15px !important;
+  color:#A9BDB7 !important; background:linear-gradient(145deg,rgba(19,37,34,.96),rgba(12,24,22,.96)) !important;
+  border:1px solid rgba(111,211,176,.20) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.045) !important;
+  font-size:1rem; font-weight:650; white-space:nowrap;
+  transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease;
 }}
-.stTabs [data-baseweb="tab"], div[data-testid="stTabs"] [role="tab"] {{
-  box-sizing:border-box; flex:0 0 auto !important; min-width:max-content; justify-content:center;
-  background: transparent !important; border: 1px solid transparent !important;
-  border-radius: 12px !important; padding: 12px 22px; height: auto;
-  color: {MUTE} !important; font-weight: 600; letter-spacing: .015em;
-  transition: color .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
+.st-key-nav_scrap_vision div.stButton > button:hover, .st-key-nav_book_loop div.stButton > button:hover,
+.st-key-nav_sound_check div.stButton > button:hover, .st-key-nav_impact div.stButton > button:hover {{
+  color:#FFFFFF !important; background:rgba(255,255,255,.075) !important;
+  border-color:rgba(255,255,255,.55) !important; transform:translateY(-2px);
+  box-shadow:0 10px 22px -16px rgba(255,255,255,.4) !important;
 }}
-.stTabs [data-baseweb="tab"]:hover, div[data-testid="stTabs"] [role="tab"]:hover {{
-  color: {TEXT} !important; background: rgba(255,255,255,.055) !important;
-  border-color: rgba(255,255,255,.3) !important; transform: translateY(-1px);
-}}
-.stTabs [data-baseweb="tab"][aria-selected="true"], div[data-testid="stTabs"] [role="tab"][aria-selected="true"] {{
-  color:#FFFFFF !important; background-color:rgba(255,255,255,.075) !important; background-image:none !important;
-  border:1px solid rgba(255,255,255,.92) !important; border-bottom:1px solid rgba(255,255,255,.92) !important;
-  box-shadow:0 0 0 2px rgba(255,255,255,.055),0 8px 22px -16px rgba(255,255,255,.55),inset 0 1px 0 rgba(255,255,255,.12) !important;
-  font-weight:700; transform:translateY(-1px);
-}}
-.stTabs [data-baseweb="tab"] p, div[data-testid="stTabs"] [role="tab"] p {{ color:inherit !important; font-weight:inherit; }}
-.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"],
-div[data-testid="stTabs"] [data-baseweb="tab-highlight"], div[data-testid="stTabs"] [data-baseweb="tab-border"],
-.stTabs [role="tab"]::after, .stTabs [role="tab"]::before,
-div[data-testid="stTabs"] [role="tab"]::after, div[data-testid="stTabs"] [role="tab"]::before,
-div[data-testid="stTabs"] [role="tablist"] > div[aria-hidden="true"] {{
-  content:none !important; display:none !important; visibility:hidden !important; opacity:0 !important;
-  border:0 !important; box-shadow:none !important; background:none !important;
-}}
-div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {{ display:none !important; visibility:hidden !important; opacity:0 !important; }}
-.stTabs [role="tab"][aria-selected="true"], div[data-testid="stTabs"] [role="tab"][aria-selected="true"] {{
-  border-bottom-color:rgba(255,255,255,.92) !important;
+.st-key-nav_scrap_vision_active div.stButton > button, .st-key-nav_book_loop_active div.stButton > button,
+.st-key-nav_sound_check_active div.stButton > button, .st-key-nav_impact_active div.stButton > button {{
+  color:#FFFFFF !important; background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.055)) !important;
+  border:1px solid rgba(255,255,255,.94) !important; outline:1px solid rgba(255,255,255,.17); outline-offset:2px;
+  box-shadow:0 8px 24px -17px rgba(255,255,255,.6),inset 0 1px 0 rgba(255,255,255,.16) !important;
+  font-weight:750; transform:translateY(-1px);
 }}
 @media (max-width: 640px) {{
-  .stTabs [data-baseweb="tab-list"], div[data-testid="stTabs"] [role="tablist"] {{ width:100% !important; justify-content:center !important; gap:4px; padding:6px; }}
-  .stTabs [data-baseweb="tab"], div[data-testid="stTabs"] [role="tab"] {{ flex:0 0 auto !important; padding:10px 12px; font-size:.9rem; }}
+  .st-key-nav_scrap_vision div.stButton > button, .st-key-nav_book_loop div.stButton > button,
+  .st-key-nav_sound_check div.stButton > button, .st-key-nav_impact div.stButton > button {{ min-height:48px; padding:9px 6px; font-size:.78rem; white-space:normal; }}
 }}
 
 .stButton > button, .stDownloadButton > button, .stFormSubmitButton > button {{
@@ -560,17 +542,28 @@ button[data-testid="stPopoverButton"] {{ color:#fff !important; }}
 st.markdown(CSS, unsafe_allow_html=True)
 
 # ----------------------------------------------------------------------------
-# Main navigation: sits directly under the logo, above everything else.
-# The tab containers are created here; their content is filled in further down.
+# Main navigation: app-controlled buttons avoid Streamlit's built-in tab underline.
 # ----------------------------------------------------------------------------
 st.markdown(
     '<div class="rl-workspace-bar"><span class="rl-eyebrow">Your ReLoop workspace</span>'
     '<span class="rl-hint">Choose a section to get started</span></div>',
     unsafe_allow_html=True,
 )
-tab_scrap, tab_books, tab_sound, tab_impact = st.tabs(
-    ["Scrap Vision", "Book Loop", "Sound Check", "Impact"]
+st.session_state.setdefault("active_section", "Scrap Vision")
+active_section = st.session_state.active_section
+nav_spacer_left, nav_scrap, nav_books, nav_sound, nav_impact, nav_spacer_right = st.columns(
+    [1, 1.35, 1.35, 1.45, 0.9, 1], gap="small"
 )
+for nav_col, label, slug in [
+    (nav_scrap, "Scrap Vision", "scrap_vision"),
+    (nav_books, "Book Loop", "book_loop"),
+    (nav_sound, "Sound Check", "sound_check"),
+    (nav_impact, "Impact", "impact"),
+]:
+    widget_key = f"nav_{slug}_active" if active_section == label else f"nav_{slug}"
+    if nav_col.button(label, key=widget_key, use_container_width=True):
+        st.session_state.active_section = label
+        st.rerun()
 
 # ----------------------------------------------------------------------------
 # Data (sample data for the prototype; replace with Supabase tables later)
@@ -942,7 +935,8 @@ board_rows = "".join(
     for m, r in [("Newspaper / paper", 12), ("Iron", 28), ("Aluminium", 105), ("Copper", 650)]
 )
 ticker = "".join(f'<span>{m}<b>₹{r}/kg</b></span>' for m, r in RATES.items())
-tab_scrap.markdown(
+if active_section == "Scrap Vision":
+    st.markdown(
     f"""
 <div class="rl-hero">
   <div>
@@ -968,8 +962,8 @@ tab_scrap.markdown(
   <div><span class="rl-step">04 · COMPLETE</span><b>Connect</b><span>Local collector or buyer</span></div>
 </div>
 """,
-    unsafe_allow_html=True,
-)
+        unsafe_allow_html=True,
+    )
 
 components.html(
     """
@@ -1009,7 +1003,7 @@ components.html(
 # ----------------------------------------------------------------------------
 # Scrap Vision
 # ----------------------------------------------------------------------------
-with tab_scrap:
+if active_section == "Scrap Vision":
     st.subheader("What is your scrap worth?")
     left, right = st.columns([1, 1.15], gap="large")
     photos = []
@@ -1157,7 +1151,7 @@ with tab_scrap:
 # ----------------------------------------------------------------------------
 # Book Loop
 # ----------------------------------------------------------------------------
-with tab_books:
+if active_section == "Book Loop":
     title_col, action_col = st.columns([4.5, 1.8], vertical_alignment="center")
     title_col.subheader("Pass on your books. Buy for less.")
     if action_col.button("＋ List a book", key="list_book_button", use_container_width=True):
@@ -1354,7 +1348,7 @@ with tab_books:
 # ----------------------------------------------------------------------------
 # Sound Check
 # ----------------------------------------------------------------------------
-with tab_sound:
+if active_section == "Sound Check":
     st.subheader("Does it still run well?")
     st.write("Hold your phone near the fan or mixer while it runs, and record for 5 to 10 seconds.")
     res = None
@@ -1487,7 +1481,7 @@ def imp_feed_item(record):
     )
 
 
-with tab_impact:
+if active_section == "Impact":
     st.subheader("What you have kept in use")
     st.caption("Everything you have valued, requested, sold and checked, saved to your ReLoop account.")
 
@@ -1603,3 +1597,4 @@ with tab_impact:
         + '</div>',
         unsafe_allow_html=True,
     )
+
