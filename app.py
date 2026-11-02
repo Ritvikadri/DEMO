@@ -210,9 +210,6 @@ def show_auth_gate():
 
 current_user = show_auth_gate()
 render_brand(64, show_account=True)
-tab_scrap, tab_books, tab_sound, tab_impact = st.tabs(
-    ["Scrap Vision", "Book Loop", "Sound Check", "Impact"]
-)
 
 # ----------------------------------------------------------------------------
 # Design tokens
@@ -314,30 +311,96 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-verdict .v {{ font-family:'Bricolage Grotesque'; font-size: 3rem; font-weight: 800; line-height: 1; margin-top: 6px; }}
 .rl-verdict p {{ margin: 10px 0 0 0; opacity: .92; max-width: 40ch; }}
 
+/* ---------- impact dashboard ---------- */
+.rl-imp-hero {{ position: relative; overflow: hidden; height: 100%; min-height: 250px; border-radius: 26px; padding: 30px 34px;
+  background:
+    radial-gradient(520px 260px at 100% 0%, rgba(242,177,56,.26), transparent 62%),
+    radial-gradient(440px 280px at 0% 100%, rgba(111,211,176,.16), transparent 62%),
+    linear-gradient(160deg, #16302C 0%, #0D1B19 100%);
+  border: 1px solid {LINE}; box-shadow: 0 30px 70px -34px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.05); }}
+.rl-imp-eyebrow {{ color: {MUTE}; font-size: .78rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }}
+.rl-imp-big {{ font-family: 'Bricolage Grotesque', sans-serif; font-size: 4rem; font-weight: 800; line-height: 1.02; margin: 10px 0 8px 0;
+  background: linear-gradient(90deg, #FFD45C 0%, {MARIGOLD} 45%, {MINT} 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-variant-numeric: tabular-nums; }}
+.rl-imp-sub {{ color: #B7C9C4; max-width: 46ch; line-height: 1.5; }}
+.rl-imp-split {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }}
+.rl-imp-split span {{ background: rgba(255,255,255,.05); border: 1px solid {LINE}; border-radius: 12px; padding: 8px 14px; color: {MUTE}; font-size: .9rem; }}
+.rl-imp-split b {{ color: {TEXT}; font-weight: 700; margin-right: 4px; font-variant-numeric: tabular-nums; }}
+
+.rl-imp-level {{ height: 100%; min-height: 250px; border-radius: 26px; padding: 26px 28px; border: 1px solid {LINE};
+  background: linear-gradient(180deg, {SURFACE2} 0%, {SURFACE} 100%); box-shadow: 0 18px 40px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.04); }}
+.rl-imp-levelrow {{ display: flex; align-items: center; gap: 16px; margin: 16px 0 18px 0; }}
+.rl-imp-badge {{ width: 60px; height: 60px; flex: none; border-radius: 18px; display: grid; place-items: center; font-size: 1.9rem;
+  background: rgba(242,177,56,.14); border: 1px solid rgba(242,177,56,.4); }}
+.rl-imp-pts {{ font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.4rem; font-weight: 800; line-height: 1; color: {MARIGOLD}; font-variant-numeric: tabular-nums; }}
+.rl-imp-lvl {{ color: {TEXT}; font-weight: 600; margin-top: 4px; }}
+.rl-imp-progress {{ height: 10px; border-radius: 99px; background: #0A1514; overflow: hidden; }}
+.rl-imp-progress i {{ display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, {MINT}, {MARIGOLD}); }}
+.rl-imp-next {{ color: {TEXT}; font-size: .92rem; margin-top: 10px; }}
+.rl-imp-tip {{ color: {MUTE}; font-size: .85rem; margin-top: 6px; }}
+
+.rl-imp-panel {{ height: 100%; min-height: 330px; border-radius: 20px; padding: 20px 22px; border: 1px solid {LINE}; border-top: 3px solid var(--accent, {MARIGOLD});
+  background: linear-gradient(180deg, {SURFACE2} 0%, {SURFACE} 100%); box-shadow: 0 18px 40px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.04); }}
+.rl-imp-panel-head {{ display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }}
+.rl-imp-icon {{ width: 42px; height: 42px; flex: none; border-radius: 13px; display: grid; place-items: center; font-size: 1.3rem; }}
+.rl-imp-panel h4 {{ margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.15rem; color: {TEXT}; line-height: 1.2; }}
+.rl-imp-panel-head small {{ color: {MUTE}; font-size: .85rem; }}
+.rl-imp-stat {{ display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 0; border-bottom: 1px dashed #2A4A45; }}
+.rl-imp-stat:last-child {{ border-bottom: 0; }}
+.rl-imp-stat span {{ color: {MUTE}; font-size: .95rem; }}
+.rl-imp-stat b {{ font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.55rem; font-weight: 800; color: {TEXT}; font-variant-numeric: tabular-nums; white-space: nowrap; }}
+.rl-imp-barrow {{ margin: 16px 0 4px 0; }}
+.rl-imp-barlabel {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; font-size: .95rem; }}
+.rl-imp-barlabel span {{ display: flex; align-items: center; gap: 8px; color: {TEXT}; font-weight: 600; }}
+.rl-imp-barlabel .d {{ width: 9px; height: 9px; border-radius: 50%; display: inline-block; }}
+.rl-imp-barlabel em {{ color: {MUTE}; font-style: normal; font-variant-numeric: tabular-nums; }}
+.rl-imp-track {{ height: 12px; border-radius: 99px; background: #0A1514; overflow: hidden; }}
+.rl-imp-track i {{ display: block; height: 100%; border-radius: 99px; }}
+.rl-imp-empty {{ color: {MUTE}; font-size: .95rem; line-height: 1.5; padding: 18px 0 6px 0; }}
+.rl-imp-item {{ display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid {LINE}; }}
+.rl-imp-item:last-child {{ border-bottom: 0; }}
+.rl-imp-dot {{ width: 40px; height: 40px; flex: none; border-radius: 12px; display: grid; place-items: center; font-size: 1.15rem; }}
+.rl-imp-item .t {{ flex: 1; min-width: 0; }}
+.rl-imp-item .t b {{ display: block; color: {TEXT}; font-weight: 600; }}
+.rl-imp-item .t span {{ color: {MUTE}; font-size: .85rem; }}
+.rl-imp-amt {{ font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 1.05rem; white-space: nowrap; }}
+@media (max-width: 900px) {{
+  .rl-imp-big {{ font-size: 2.8rem; }}
+  .rl-imp-panel {{ min-height: 0; }}
+}}
+
+/* ---------- workspace label row (sits directly under the logo) ---------- */
+.rl-workspace-bar {{ display:flex; justify-content: space-between; align-items: center; gap: 16px; margin: 0 0 14px 0; padding: 0 4px; }}
+.rl-eyebrow {{ color: {MINT}; font-size: .82rem; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; }}
+.rl-hint {{ color: {MUTE}; font-size: 1rem; }}
+@media (max-width: 640px) {{
+  .rl-workspace-bar {{ flex-direction: column; align-items: flex-start; gap: 4px; }}
+}}
+
 /* ---------- primary section navigation ---------- */
-.stTabs {{ margin: 2px 0 28px; }}
+.stTabs {{ margin: 0 0 30px; }}
 .stTabs [data-baseweb="tab-list"] {{
-  display: flex; justify-content: stretch; align-items: center; gap: 8px;
-  border: 1px solid rgba(111,211,176,.15); border-radius: 16px;
-  background: linear-gradient(110deg, rgba(17,31,29,.96), rgba(13,25,23,.92));
-  box-shadow: 0 12px 30px -24px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.045);
-  padding: 8px; overflow-x: auto;
+  display: flex; justify-content: center; align-items: center; gap: 12px;
+  border: 1px solid rgba(111,211,176,.13); border-radius: 18px;
+  background: linear-gradient(110deg, rgba(17,31,29,.94), rgba(13,25,23,.88));
+  box-shadow: 0 14px 36px -28px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.035);
+  padding: 10px; overflow-x: auto;
 }}
 .stTabs [data-baseweb="tab"] {{
   flex: 1 1 0; min-width: max-content; justify-content: center;
   background: transparent !important; border: 1px solid transparent !important;
-  border-radius: 11px; padding: 11px 18px; height: auto;
-  color: #A9BDB7 !important; font-weight: 600; letter-spacing: .01em;
+  border-radius: 12px; padding: 12px 20px; height: auto;
+  color: {MUTE} !important; font-weight: 600; letter-spacing: .01em;
   transition: color .18s ease, border-color .18s ease, background .18s ease, transform .18s ease;
 }}
 .stTabs [data-baseweb="tab"]:hover {{
-  color: {TEXT} !important; background: rgba(255,255,255,.045) !important;
-  border-color: rgba(255,255,255,.24) !important; transform: translateY(-1px);
+  color: {TEXT} !important; background: rgba(255,255,255,.035) !important;
+  border-color: rgba(255,255,255,.18) !important; transform: translateY(-1px);
 }}
 .stTabs [data-baseweb="tab"][aria-selected="true"] {{
-  color: #FFFFFF !important; background: rgba(255,255,255,.055) !important;
-  border: 1px solid rgba(255,255,255,.9) !important;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 4px 14px -12px rgba(255,255,255,.32);
+  color: #FFFFFF !important; background: rgba(255,255,255,.045) !important;
+  border: 1px solid rgba(255,255,255,.88) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 5px 18px -12px rgba(255,255,255,.32);
   font-weight: 700;
 }}
 .stTabs [data-baseweb="tab"] p {{ color: inherit !important; font-weight: inherit; }}
@@ -383,6 +446,19 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 </style>
 """
 st.markdown(CSS, unsafe_allow_html=True)
+
+# ----------------------------------------------------------------------------
+# Main navigation: sits directly under the logo, above everything else.
+# The tab containers are created here; their content is filled in further down.
+# ----------------------------------------------------------------------------
+st.markdown(
+    '<div class="rl-workspace-bar"><span class="rl-eyebrow">Your ReLoop workspace</span>'
+    '<span class="rl-hint">Choose a section to get started</span></div>',
+    unsafe_allow_html=True,
+)
+tab_scrap, tab_books, tab_sound, tab_impact = st.tabs(
+    ["Scrap Vision", "Book Loop", "Sound Check", "Impact"]
+)
 
 # ----------------------------------------------------------------------------
 # Data (sample data for the prototype; replace with Supabase tables later)
@@ -654,40 +730,13 @@ def read_wav(raw: bytes):
     return sr, x[: sr * 12]  # use at most 12 seconds
 
 
-def decode_audio(raw: bytes, filename=""):
-    """Read WAV directly; use PyAV (bundled with Streamlit) for browser formats such as MP3/WebM."""
-    if filename.lower().endswith(".wav"):
-        return read_wav(raw)
-
-    import av
-
-    with av.open(io.BytesIO(raw)) as container:
-        audio_stream = next((s for s in container.streams if s.type == "audio"), None)
-        if audio_stream is None:
-            raise ValueError("No audio track was found")
-        sample_rate = int(audio_stream.rate or 0)
-        chunks = []
-        for frame in container.decode(audio_stream):
-            samples = frame.to_ndarray().astype(np.float32)
-            # PyAV returns planar audio as channels × samples and packed audio as samples × channels.
-            if samples.ndim == 2:
-                if samples.shape[0] <= 8:
-                    samples = samples.mean(axis=0)
-                else:
-                    samples = samples.mean(axis=1)
-            chunks.append(samples.reshape(-1))
-        if not chunks or sample_rate <= 0:
-            raise ValueError("The audio file could not be decoded")
-        return sample_rate, np.concatenate(chunks)[: sample_rate * 12]
-
-
-def analyze_audio(raw: bytes, filename=""):
+def analyze_audio(raw: bytes):
     """
     Prototype heuristic standing in for a fine-tuned YAMNet classifier.
     A healthy fan or mixer gives a steady, tonal hum. Faults show up as unstable loudness,
     noisy (flat) spectrum and extra high-frequency rattle.
     """
-    sr, x = decode_audio(raw, filename)
+    sr, x = read_wav(raw)
     x = x - np.mean(x)
     rms = float(np.sqrt(np.mean(x ** 2)))
     if rms < 0.004:
@@ -712,34 +761,29 @@ def analyze_audio(raw: bytes, filename=""):
     flat = float(np.exp(np.mean(np.log(p))) / np.mean(p))
     hf = float(spec[(freqs >= 2000) & (freqs <= 8000)].sum() / (spec[band].sum() + 1e-12))
 
-    # Consumer appliances are naturally loud, broadband and cyclic. Treat these as
-    # weak clues only: this heuristic is not a trained fault classifier.
-    variability = min(max((cv - 0.22) / 0.85, 0), 1)
-    broadband = min(max((flat - 0.10) / 0.75, 0), 1)
-    high_frequency = min(max((hf - 0.18) / 0.72, 0), 1)
-    fault = 0.55 * variability + 0.25 * broadband + 0.20 * high_frequency
+    fault = 0.4 * min(cv / 0.6, 1) + 0.35 * min(flat / 0.3, 1) + 0.25 * min(hf / 0.5, 1)
     return dict(rms=rms, cv=cv, flat=flat, hf=hf, fault=float(fault), silent=False, x=x, sr=sr)
 
 
 def verdict_for(fault, silent):
     if silent:
         return "SCRAP", "#7A3B2E|#B5503A", "No running sound picked up. Check the recording, or treat as dead."
-    if fault < 0.55:
-        return "LIKELY WORKING", "#0F4A38|#1E8A63", "The recording sounds broadly consistent with a running appliance. Check its actual operation before selling."
-    if fault < 0.82:
-        return "CHECK / REPAIR", "#6B4A0C|#C58A1B", "The audio has some irregularity. Listen for grinding, burning smells, excess heat or poor performance before deciding."
-    return "NEEDS A MANUAL CHECK", "#6B4A0C|#C58A1B", "This recording is unusual, but sound alone cannot tell whether the appliance is unusable. Inspect and test it before deciding."
+    if fault < 0.35:
+        return "RESELL", "#0F4A38|#1E8A63", "Steady, clean sound. This looks healthy enough to sell as working."
+    if fault < 0.65:
+        return "REPAIR", "#6B4A0C|#C58A1B", "Some rattle or uneven speed. A small repair could restore its value."
+    return "SCRAP", "#7A3B2E|#B5503A", "Rough, unstable sound. Sell it for parts or metal."
 
 
 # ----------------------------------------------------------------------------
-# Hero
+# Hero (shown at the top of the Scrap Vision tab, under the main navigation)
 # ----------------------------------------------------------------------------
 board_rows = "".join(
     f'<div class="rl-row"><span>{m}</span><b>₹{r}/kg</b></div>'
     for m, r in [("Newspaper / paper", 12), ("Iron", 28), ("Aluminium", 105), ("Copper", 650)]
 )
 ticker = "".join(f'<span>{m}<b>₹{r}/kg</b></span>' for m, r in RATES.items())
-st.markdown(
+tab_scrap.markdown(
     f"""
 <div class="rl-hero">
   <div>
@@ -1111,6 +1155,7 @@ with tab_books:
             except Exception as e:
                 st.error(f"Could not mark the book sold. Run the latest sales migration SQL. ({type(e).__name__})")
 
+# ----------------------------------------------------------------------------
 # Sound Check
 # ----------------------------------------------------------------------------
 with tab_sound:
@@ -1121,7 +1166,7 @@ with tab_sound:
     with s1:
         appliance = st.selectbox("Appliance", ["Ceiling or table fan", "Mixer grinder"])
         rec = st.audio_input("Record the sound")
-        up = st.file_uploader("or upload an audio file", type=["wav", "mp3", "m4a", "ogg", "webm"])
+        up = st.file_uploader("or upload a WAV file", type=["wav"])
         audio = rec or up
 
     with s2:
@@ -1133,7 +1178,7 @@ with tab_sound:
             )
         else:
             try:
-                res = analyze_audio(audio.getvalue(), getattr(audio, "name", ""))
+                res = analyze_audio(audio.getvalue())
                 label, colour, why = verdict_for(res["fault"], res["silent"])
                 c1_, c2_ = colour.split("|")
                 st.markdown(
@@ -1152,56 +1197,207 @@ with tab_sound:
                     except Exception as e:
                         st.error(f"Could not save the verdict. Run the Supabase setup SQL first. ({type(e).__name__})")
             except Exception:
-                st.error("Could not read this audio. Try a WAV, MP3, M4A, OGG or WebM recording.")
+                st.error("Could not read this audio. Record again, or upload a WAV file (16-bit).")
 
     if res is not None and not res["silent"]:
         step = max(1, len(res["x"]) // 1500)
         st.caption("Waveform")
         st.line_chart(pd.DataFrame({"amplitude": res["x"][::step]}), height=160, color=MARIGOLD)
-    st.caption("Sound Check is an early audio estimate, not a fault diagnosis. Normal grinder noise can sound rough; verify the appliance by running it and checking its performance.")
+    st.caption("Prototype scoring uses simple sound features. The full version swaps in a YAMNet model fine-tuned on working, noisy and dead appliance clips.")
 
 # ----------------------------------------------------------------------------
 # Impact
 # ----------------------------------------------------------------------------
+LEVELS = [(0, "Seedling", "🌱"), (100, "Sprout", "🌿"), (300, "Grower", "🌳"),
+          (600, "Champion", "🏆"), (1000, "Legend", "🌍")]
+VERDICT_LABELS = {"RESELL": ("Resell", MINT), "REPAIR": ("Repair", MARIGOLD), "SCRAP": ("Scrap", CORAL)}
+BAR_COLOURS = [MINT, MARIGOLD, CORAL, "#9DB7FF", "#C7A6FF", "#7FD1E8"]
+
+
+def imp_money(x):
+    return f"₹{x:,.0f}"
+
+
+def imp_level(points):
+    idx = max(i for i, (need, _, _) in enumerate(LEVELS) if points >= need)
+    cur = LEVELS[idx]
+    nxt = LEVELS[idx + 1] if idx + 1 < len(LEVELS) else None
+    pct = 100.0 if nxt is None else (points - cur[0]) / (nxt[0] - cur[0]) * 100
+    return cur, nxt, pct
+
+
+def imp_stat(label, value):
+    return f'<div class="rl-imp-stat"><span>{html.escape(label)}</span><b>{value}</b></div>'
+
+
+def imp_bar(label, value_text, pct, colour):
+    width = 0 if pct <= 0 else max(pct, 3)
+    return (
+        '<div class="rl-imp-barrow"><div class="rl-imp-barlabel">'
+        f'<span><i class="d" style="background:{colour}"></i>{html.escape(label)}</span><em>{value_text}</em></div>'
+        f'<div class="rl-imp-track"><i style="width:{width:.0f}%;background:{colour}"></i></div></div>'
+    )
+
+
+def imp_panel(icon, title, subtitle, accent, body):
+    return (
+        f'<div class="rl-imp-panel" style="--accent:{accent}">'
+        f'<div class="rl-imp-panel-head"><div class="rl-imp-icon" style="background:{accent}22">{icon}</div>'
+        f'<div><h4>{html.escape(title)}</h4><small>{html.escape(subtitle)}</small></div></div>'
+        f'{body}</div>'
+    )
+
+
+def imp_when(ts):
+    try:
+        return pd.to_datetime(ts, utc=True).tz_convert("Asia/Kolkata").strftime("%d %b · %I:%M %p")
+    except Exception:
+        return ""
+
+
+def imp_feed_item(record):
+    kind = record.get("kind")
+    d = record.get("details") or {}
+    amount = float(record.get("amount") or 0)
+    if kind == "scrap":
+        names = [str(m.get("Material")) for m in (d.get("materials") or []) if isinstance(m, dict) and m.get("Material")]
+        icon, colour = "♻️", MINT
+        title = f"Valued {float(record.get('kg') or 0):.1f} kg of scrap"
+        sub = (", ".join(names[:3]) + ("…" if len(names) > 3 else "")) if names else "Scrap valuation"
+        right, rcol = imp_money(amount), MARIGOLD
+    elif kind == "book_request":
+        icon, colour = "📚", "#9DB7FF"
+        title, sub = "Requested a book", "Request sent to the owner"
+        right, rcol = f"{imp_money(amount)} saved", MINT
+    elif kind == "book_sold":
+        icon, colour = "🏷️", MARIGOLD
+        title, sub = "Sold a book", f"+{int(d.get('points', 0))} ReLoop points"
+        right, rcol = imp_money(amount), MARIGOLD
+    elif kind == "appliance":
+        label, vcol = VERDICT_LABELS.get(d.get("verdict"), (str(d.get("verdict") or "Checked"), MUTE))
+        icon, colour = "🔊", CORAL
+        title = f"Checked a {str(d.get('appliance') or 'appliance').lower()}"
+        sub = "Sound check"
+        right, rcol = label.upper(), vcol
+    else:
+        icon, colour, title, sub, right, rcol = "•", MUTE, str(kind or "Activity"), "", "", MUTE
+    when = imp_when(record.get("created_at"))
+    sub_full = f"{sub} · {when}" if (sub and when) else (sub or when)
+    return (
+        '<div class="rl-imp-item">'
+        f'<div class="rl-imp-dot" style="background:{colour}22">{icon}</div>'
+        f'<div class="t"><b>{html.escape(title)}</b><span>{html.escape(sub_full)}</span></div>'
+        f'<div class="rl-imp-amt" style="color:{rcol}">{html.escape(right)}</div></div>'
+    )
+
+
 with tab_impact:
     st.subheader("What you have kept in use")
+    st.caption("Everything you have valued, requested, sold and checked, saved to your ReLoop account.")
+
     try:
         records = load_impact_records()
-        scrap_rows = [r for r in records if r["kind"] == "scrap"]
-        book_rows = [r for r in records if r["kind"] == "book_request"]
-        audio_rows = [r for r in records if r["kind"] == "appliance"]
-        sale_rows = [r for r in records if r["kind"] == "book_sold"]
-        points_total = sum(int((r.get("details") or {}).get("points", 0)) for r in sale_rows)
-        sale_value_total = sum(float(r.get("amount") or 0) for r in sale_rows)
-        kg_total = sum(float(r.get("kg") or 0) for r in scrap_rows)
-        value_total = sum(float(r.get("amount") or 0) for r in scrap_rows)
-        books_total = len(book_rows)
-        saved_total = sum(float(r.get("amount") or 0) for r in book_rows)
-        verdict_counts = {name: 0 for name in ("RESELL", "REPAIR", "SCRAP")}
-        for record in audio_rows:
-            verdict = (record.get("details") or {}).get("verdict")
-            if verdict in verdict_counts:
-                verdict_counts[verdict] += 1
     except Exception as e:
+        records = []
         st.error(f"Could not load your impact history. Run the Supabase setup SQL and check RLS policies. ({type(e).__name__})")
-        kg_total = value_total = saved_total = 0
-        books_total = 0
-        points_total = 0
-        sale_value_total = 0
-        sale_rows = []
-        verdict_counts = {name: 0 for name in ("RESELL", "REPAIR", "SCRAP")}
 
-    k1, k2, k3, k4, k5, k6, k7 = st.columns(7)
-    k1.metric("Scrap valued", f"{kg_total:.1f} kg")
-    k2.metric("Scrap value", f"₹{value_total:,.0f}")
-    k3.metric("Books requested", books_total)
-    k4.metric("Saved by juniors", f"₹{saved_total:,.0f}")
-    k5.metric("Books sold", len(sale_rows))
-    k6.metric("Sale value", f"₹{sale_value_total:,.0f}")
-    k7.metric("ReLoop points", points_total)
+    scrap_rows = [r for r in records if r["kind"] == "scrap"]
+    book_rows = [r for r in records if r["kind"] == "book_request"]
+    audio_rows = [r for r in records if r["kind"] == "appliance"]
+    sale_rows = [r for r in records if r["kind"] == "book_sold"]
 
-    st.markdown("&nbsp;")
-    st.markdown("**Appliance verdicts**")
-    vdf = pd.DataFrame({"Verdict": list(verdict_counts), "Count": list(verdict_counts.values())}).set_index("Verdict")
-    st.bar_chart(vdf, color=MARIGOLD, height=220)
-    st.caption("Your totals are saved to your ReLoop account.")
+    kg_total = sum(float(r.get("kg") or 0) for r in scrap_rows)
+    value_total = sum(float(r.get("amount") or 0) for r in scrap_rows)
+    saved_total = sum(float(r.get("amount") or 0) for r in book_rows)
+    sale_value_total = sum(float(r.get("amount") or 0) for r in sale_rows)
+    points_total = sum(int((r.get("details") or {}).get("points", 0)) for r in sale_rows)
+    total_unlocked = value_total + saved_total + sale_value_total
+
+    verdict_counts = {name: 0 for name in ("RESELL", "REPAIR", "SCRAP")}
+    for record in audio_rows:
+        verdict = (record.get("details") or {}).get("verdict")
+        if verdict in verdict_counts:
+            verdict_counts[verdict] += 1
+    verdict_total = sum(verdict_counts.values())
+
+    material_kg = {}
+    for record in scrap_rows:
+        for m in (record.get("details") or {}).get("materials") or []:
+            if isinstance(m, dict) and m.get("Material") and m.get("Weight (kg)") is not None:
+                material_kg[m["Material"]] = material_kg.get(m["Material"], 0.0) + float(m["Weight (kg)"])
+
+    # ---- Row 1: headline value + points level ----
+    cur, nxt, level_pct = imp_level(points_total)
+    next_text = "Top level reached. Thank you for keeping things in use." if nxt is None \
+        else f"{nxt[0] - points_total:,} points to {nxt[1]}"
+    hero_html = (
+        '<div class="rl-imp-hero">'
+        '<div class="rl-imp-eyebrow">Value unlocked</div>'
+        f'<div class="rl-imp-big">{imp_money(total_unlocked)}</div>'
+        '<div class="rl-imp-sub">Scrap you have valued, books passed on to juniors and books you have sold through ReLoop.</div>'
+        '<div class="rl-imp-split">'
+        f'<span><b>{imp_money(value_total)}</b>scrap value</span>'
+        f'<span><b>{imp_money(saved_total)}</b>saved by juniors</span>'
+        f'<span><b>{imp_money(sale_value_total)}</b>from book sales</span>'
+        '</div></div>'
+    )
+    level_html = (
+        '<div class="rl-imp-level">'
+        '<div class="rl-imp-eyebrow">ReLoop points</div>'
+        '<div class="rl-imp-levelrow">'
+        f'<div class="rl-imp-badge">{cur[2]}</div>'
+        f'<div><div class="rl-imp-pts">{points_total:,}</div><div class="rl-imp-lvl">{cur[1]} level</div></div></div>'
+        f'<div class="rl-imp-progress"><i style="width:{level_pct:.0f}%"></i></div>'
+        f'<div class="rl-imp-next">{next_text}</div>'
+        '<div class="rl-imp-tip">Earn 100 points every time a listed book is sold.</div>'
+        '</div>'
+    )
+    hero_col, level_col = st.columns([2, 1], gap="medium")
+    hero_col.markdown(hero_html, unsafe_allow_html=True)
+    level_col.markdown(level_html, unsafe_allow_html=True)
+
+    # ---- Row 2: scrap, books, appliances ----
+    scrap_body = (
+        imp_stat("Weight valued", f"{kg_total:.1f} kg")
+        + imp_stat("Estimated value", imp_money(value_total))
+        + imp_stat("Valuations saved", f"{len(scrap_rows)}")
+    )
+    books_body = (
+        imp_stat("Books requested", f"{len(book_rows)}")
+        + imp_stat("Saved by juniors", imp_money(saved_total))
+        + imp_stat("Books sold", f"{len(sale_rows)}")
+        + imp_stat("Sale value", imp_money(sale_value_total))
+    )
+    verdict_body = ""
+    for v in ("RESELL", "REPAIR", "SCRAP"):
+        share = verdict_counts[v] / verdict_total * 100 if verdict_total else 0
+        text = f"{verdict_counts[v]} · {share:.0f}%" if verdict_total else "0"
+        verdict_body += imp_bar(VERDICT_LABELS[v][0], text, share, VERDICT_LABELS[v][1])
+    if not verdict_total:
+        verdict_body += '<div class="rl-imp-empty">Record a fan or mixer on the Sound Check tab and save the verdict to see it here.</div>'
+
+    p1, p2, p3 = st.columns(3, gap="medium")
+    p1.markdown(imp_panel("♻️", "Scrap", "Photo valuations", MINT, scrap_body), unsafe_allow_html=True)
+    p2.markdown(imp_panel("📚", "Books", "Book Loop activity", "#9DB7FF", books_body), unsafe_allow_html=True)
+    p3.markdown(imp_panel("🔊", "Appliance verdicts", f"{verdict_total} checked", CORAL, verdict_body), unsafe_allow_html=True)
+
+    # ---- Row 3: what you valued + recent activity ----
+    top_materials = sorted(material_kg.items(), key=lambda kv: -kv[1])[:6]
+    if top_materials:
+        biggest = top_materials[0][1] or 1.0
+        mat_body = "".join(
+            imp_bar(name, f"{kg:.1f} kg", kg / biggest * 100, BAR_COLOURS[i % len(BAR_COLOURS)])
+            for i, (name, kg) in enumerate(top_materials)
+        )
+    else:
+        mat_body = '<div class="rl-imp-empty">Value some scrap on the Scrap Vision tab and save it to see which materials you keep in use.</div>'
+
+    recent = sorted(records, key=lambda r: str(r.get("created_at") or ""), reverse=True)[:6]
+    if recent:
+        feed_body = "".join(imp_feed_item(r) for r in recent)
+    else:
+        feed_body = '<div class="rl-imp-empty">Nothing here yet. Your scrap valuations, book requests, sales and sound checks will appear as you use ReLoop.</div>'
+
+    m_col, f_col = st.columns([1, 1.4], gap="medium")
+    m_col.markdown(imp_panel("⚖️", "Scrap by material", "Total weight you have valued", MARIGOLD, mat_body), unsafe_allow_html=True)
+    f_col.markdown(imp_panel("🕒", "Recent activity", "Your latest actions", MINT, feed_body), unsafe_allow_html=True)
