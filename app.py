@@ -210,6 +210,9 @@ def show_auth_gate():
 
 current_user = show_auth_gate()
 render_brand(64, show_account=True)
+tab_scrap, tab_books, tab_sound, tab_impact = st.tabs(
+    ["Scrap Vision", "Book Loop", "Sound Check", "Impact"]
+)
 
 # ----------------------------------------------------------------------------
 # Design tokens
@@ -311,38 +314,30 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-verdict .v {{ font-family:'Bricolage Grotesque'; font-size: 3rem; font-weight: 800; line-height: 1; margin-top: 6px; }}
 .rl-verdict p {{ margin: 10px 0 0 0; opacity: .92; max-width: 40ch; }}
 
-/* ---------- workspace label row (sits directly under the logo) ---------- */
-.rl-workspace-bar {{ display:flex; justify-content: space-between; align-items: center; gap: 16px; margin: 0 0 14px 0; padding: 0 4px; }}
-.rl-eyebrow {{ color: {MINT}; font-size: .82rem; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; }}
-.rl-hint {{ color: {MUTE}; font-size: 1rem; }}
-@media (max-width: 640px) {{
-  .rl-workspace-bar {{ flex-direction: column; align-items: flex-start; gap: 4px; }}
-}}
-
 /* ---------- primary section navigation ---------- */
-.stTabs {{ margin: 0 0 30px; }}
+.stTabs {{ margin: 2px 0 28px; }}
 .stTabs [data-baseweb="tab-list"] {{
-  display: flex; justify-content: center; align-items: center; gap: 12px;
-  border: 1px solid rgba(111,211,176,.13); border-radius: 18px;
-  background: linear-gradient(110deg, rgba(17,31,29,.94), rgba(13,25,23,.88));
-  box-shadow: 0 14px 36px -28px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.035);
-  padding: 10px; overflow-x: auto;
+  display: flex; justify-content: stretch; align-items: center; gap: 8px;
+  border: 1px solid rgba(111,211,176,.15); border-radius: 16px;
+  background: linear-gradient(110deg, rgba(17,31,29,.96), rgba(13,25,23,.92));
+  box-shadow: 0 12px 30px -24px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.045);
+  padding: 8px; overflow-x: auto;
 }}
 .stTabs [data-baseweb="tab"] {{
   flex: 1 1 0; min-width: max-content; justify-content: center;
   background: transparent !important; border: 1px solid transparent !important;
-  border-radius: 12px; padding: 12px 20px; height: auto;
-  color: {MUTE} !important; font-weight: 600; letter-spacing: .01em;
+  border-radius: 11px; padding: 11px 18px; height: auto;
+  color: #A9BDB7 !important; font-weight: 600; letter-spacing: .01em;
   transition: color .18s ease, border-color .18s ease, background .18s ease, transform .18s ease;
 }}
 .stTabs [data-baseweb="tab"]:hover {{
-  color: {TEXT} !important; background: rgba(255,255,255,.035) !important;
-  border-color: rgba(255,255,255,.18) !important; transform: translateY(-1px);
+  color: {TEXT} !important; background: rgba(255,255,255,.045) !important;
+  border-color: rgba(255,255,255,.24) !important; transform: translateY(-1px);
 }}
 .stTabs [data-baseweb="tab"][aria-selected="true"] {{
-  color: #FFFFFF !important; background: rgba(255,255,255,.045) !important;
-  border: 1px solid rgba(255,255,255,.88) !important;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 5px 18px -12px rgba(255,255,255,.32);
+  color: #FFFFFF !important; background: rgba(255,255,255,.055) !important;
+  border: 1px solid rgba(255,255,255,.9) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 4px 14px -12px rgba(255,255,255,.32);
   font-weight: 700;
 }}
 .stTabs [data-baseweb="tab"] p {{ color: inherit !important; font-weight: inherit; }}
@@ -388,19 +383,6 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 </style>
 """
 st.markdown(CSS, unsafe_allow_html=True)
-
-# ----------------------------------------------------------------------------
-# Main navigation: sits directly under the logo, above everything else.
-# The tab containers are created here; their content is filled in further down.
-# ----------------------------------------------------------------------------
-st.markdown(
-    '<div class="rl-workspace-bar"><span class="rl-eyebrow">Your ReLoop workspace</span>'
-    '<span class="rl-hint"></span></div>',
-    unsafe_allow_html=True,
-)
-tab_scrap, tab_books, tab_sound, tab_impact = st.tabs(
-    ["Scrap Vision", "Book Loop", "Sound Check", "Impact"]
-)
 
 # ----------------------------------------------------------------------------
 # Data (sample data for the prototype; replace with Supabase tables later)
@@ -672,13 +654,40 @@ def read_wav(raw: bytes):
     return sr, x[: sr * 12]  # use at most 12 seconds
 
 
-def analyze_audio(raw: bytes):
+def decode_audio(raw: bytes, filename=""):
+    """Read WAV directly; use PyAV (bundled with Streamlit) for browser formats such as MP3/WebM."""
+    if filename.lower().endswith(".wav"):
+        return read_wav(raw)
+
+    import av
+
+    with av.open(io.BytesIO(raw)) as container:
+        audio_stream = next((s for s in container.streams if s.type == "audio"), None)
+        if audio_stream is None:
+            raise ValueError("No audio track was found")
+        sample_rate = int(audio_stream.rate or 0)
+        chunks = []
+        for frame in container.decode(audio_stream):
+            samples = frame.to_ndarray().astype(np.float32)
+            # PyAV returns planar audio as channels × samples and packed audio as samples × channels.
+            if samples.ndim == 2:
+                if samples.shape[0] <= 8:
+                    samples = samples.mean(axis=0)
+                else:
+                    samples = samples.mean(axis=1)
+            chunks.append(samples.reshape(-1))
+        if not chunks or sample_rate <= 0:
+            raise ValueError("The audio file could not be decoded")
+        return sample_rate, np.concatenate(chunks)[: sample_rate * 12]
+
+
+def analyze_audio(raw: bytes, filename=""):
     """
     Prototype heuristic standing in for a fine-tuned YAMNet classifier.
     A healthy fan or mixer gives a steady, tonal hum. Faults show up as unstable loudness,
     noisy (flat) spectrum and extra high-frequency rattle.
     """
-    sr, x = read_wav(raw)
+    sr, x = decode_audio(raw, filename)
     x = x - np.mean(x)
     rms = float(np.sqrt(np.mean(x ** 2)))
     if rms < 0.004:
@@ -703,34 +712,39 @@ def analyze_audio(raw: bytes):
     flat = float(np.exp(np.mean(np.log(p))) / np.mean(p))
     hf = float(spec[(freqs >= 2000) & (freqs <= 8000)].sum() / (spec[band].sum() + 1e-12))
 
-    fault = 0.4 * min(cv / 0.6, 1) + 0.35 * min(flat / 0.3, 1) + 0.25 * min(hf / 0.5, 1)
+    # Consumer appliances are naturally loud, broadband and cyclic. Treat these as
+    # weak clues only: this heuristic is not a trained fault classifier.
+    variability = min(max((cv - 0.22) / 0.85, 0), 1)
+    broadband = min(max((flat - 0.10) / 0.75, 0), 1)
+    high_frequency = min(max((hf - 0.18) / 0.72, 0), 1)
+    fault = 0.55 * variability + 0.25 * broadband + 0.20 * high_frequency
     return dict(rms=rms, cv=cv, flat=flat, hf=hf, fault=float(fault), silent=False, x=x, sr=sr)
 
 
 def verdict_for(fault, silent):
     if silent:
         return "SCRAP", "#7A3B2E|#B5503A", "No running sound picked up. Check the recording, or treat as dead."
-    if fault < 0.35:
-        return "RESELL", "#0F4A38|#1E8A63", "Steady, clean sound. This looks healthy enough to sell as working."
-    if fault < 0.65:
-        return "REPAIR", "#6B4A0C|#C58A1B", "Some rattle or uneven speed. A small repair could restore its value."
-    return "SCRAP", "#7A3B2E|#B5503A", "Rough, unstable sound. Sell it for parts or metal."
+    if fault < 0.55:
+        return "LIKELY WORKING", "#0F4A38|#1E8A63", "The recording sounds broadly consistent with a running appliance. Check its actual operation before selling."
+    if fault < 0.82:
+        return "CHECK / REPAIR", "#6B4A0C|#C58A1B", "The audio has some irregularity. Listen for grinding, burning smells, excess heat or poor performance before deciding."
+    return "NEEDS A MANUAL CHECK", "#6B4A0C|#C58A1B", "This recording is unusual, but sound alone cannot tell whether the appliance is unusable. Inspect and test it before deciding."
 
 
 # ----------------------------------------------------------------------------
-# Hero (shown at the top of the Scrap Vision tab, under the main navigation)
+# Hero
 # ----------------------------------------------------------------------------
 board_rows = "".join(
     f'<div class="rl-row"><span>{m}</span><b>₹{r}/kg</b></div>'
     for m, r in [("Newspaper / paper", 12), ("Iron", 28), ("Aluminium", 105), ("Copper", 650)]
 )
 ticker = "".join(f'<span>{m}<b>₹{r}/kg</b></span>' for m, r in RATES.items())
-tab_scrap.markdown(
+st.markdown(
     f"""
 <div class="rl-hero">
   <div>
     <span class="rl-pill">Team Sutra · Ideathon 2026</span>
-    <h1 class="rl-display">Know what it's WORTH before you sell it.</h1>
+    <h1 class="rl-display">Know what it's worth before you sell it.</h1>
     <p>Reuse it, resell it, or recycle it. ReLoop helps you decide, in that order.</p>
     <div class="rl-chips">
       <span class="rl-chip"><b>Scrap</b> priced by photo</span>
@@ -1097,7 +1111,6 @@ with tab_books:
             except Exception as e:
                 st.error(f"Could not mark the book sold. Run the latest sales migration SQL. ({type(e).__name__})")
 
-# ----------------------------------------------------------------------------
 # Sound Check
 # ----------------------------------------------------------------------------
 with tab_sound:
@@ -1108,7 +1121,7 @@ with tab_sound:
     with s1:
         appliance = st.selectbox("Appliance", ["Ceiling or table fan", "Mixer grinder"])
         rec = st.audio_input("Record the sound")
-        up = st.file_uploader("or upload a WAV file", type=["wav"])
+        up = st.file_uploader("or upload an audio file", type=["wav", "mp3", "m4a", "ogg", "webm"])
         audio = rec or up
 
     with s2:
@@ -1120,7 +1133,7 @@ with tab_sound:
             )
         else:
             try:
-                res = analyze_audio(audio.getvalue())
+                res = analyze_audio(audio.getvalue(), getattr(audio, "name", ""))
                 label, colour, why = verdict_for(res["fault"], res["silent"])
                 c1_, c2_ = colour.split("|")
                 st.markdown(
@@ -1139,13 +1152,13 @@ with tab_sound:
                     except Exception as e:
                         st.error(f"Could not save the verdict. Run the Supabase setup SQL first. ({type(e).__name__})")
             except Exception:
-                st.error("Could not read this audio. Record again, or upload a WAV file (16-bit).")
+                st.error("Could not read this audio. Try a WAV, MP3, M4A, OGG or WebM recording.")
 
     if res is not None and not res["silent"]:
         step = max(1, len(res["x"]) // 1500)
         st.caption("Waveform")
         st.line_chart(pd.DataFrame({"amplitude": res["x"][::step]}), height=160, color=MARIGOLD)
-    st.caption("Prototype scoring uses simple sound features. The full version swaps in a YAMNet model fine-tuned on working, noisy and dead appliance clips.")
+    st.caption("Sound Check is an early audio estimate, not a fault diagnosis. Normal grinder noise can sound rough; verify the appliance by running it and checking its performance.")
 
 # ----------------------------------------------------------------------------
 # Impact
