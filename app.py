@@ -1162,8 +1162,16 @@ if active_section == "Book Loop":
         st.session_state.show_book_form = True
 
     f1, f2, f3 = st.columns([1, 1, 2])
-    exam = f1.selectbox("Exam", ["All", "JEE", "NEET", "Boards"])
-    subject = f2.selectbox("Subject", ["All", "Physics", "Chemistry", "Maths", "Biology"])
+    book_exams = [
+        "JEE", "NEET", "Boards", *[f"Class {grade}" for grade in range(1, 13)],
+        "Civil Services", "Other",
+    ]
+    book_subjects = [
+        "Physics", "Chemistry", "Maths", "Biology", "English", "Social Studies",
+        "Computer Science", "General Knowledge", "Other",
+    ]
+    exam = f1.selectbox("Exam / category", ["All", *book_exams])
+    subject = f2.selectbox("Subject", ["All", *book_subjects])
     q = f3.text_input("Search by title", placeholder="e.g. HC Verma")
 
     try:
@@ -1214,7 +1222,7 @@ if active_section == "Book Loop":
                 if owner_id == current_user["id"]:
                     st.caption("Your active listing — see My books for sale below.")
                 elif listing_id in requested_ids:
-                    st.button("Request sent", key=f"req_{listing_id}", disabled=True)
+                    st.button("Request sent", key=f"req_{listing_id}", disabled=True, use_container_width=True)
                     contact = contact_by_owner.get(owner_id)
                     if contact:
                         owner_email = (contact.get("email") or "").strip()
@@ -1242,7 +1250,7 @@ if active_section == "Book Loop":
                             actions[1].caption("Email draft unavailable: owner email is missing.")
                     else:
                         st.warning("Your request is saved, but the owner’s contact profile is unavailable.")
-                elif st.button("Request this book", key=f"req_{listing_id}"):
+                elif st.button("Request this book", key=f"req_{listing_id}", use_container_width=True):
                     try:
                         db_client().table("book_requests").insert({
                             "listing_id": listing_id, "requester_id": current_user["id"]
@@ -1262,8 +1270,8 @@ if active_section == "Book Loop":
                 title = a.text_input("Book title")
                 seller = b_.text_input("Your name")
                 c1, c2, c3, c4 = st.columns(4)
-                ex = c1.selectbox("Exam", ["JEE", "NEET", "Boards"])
-                sub = c2.selectbox("Subject", ["Physics", "Chemistry", "Maths", "Biology"])
+                ex = c1.selectbox("Exam / category", book_exams)
+                sub = c2.selectbox("Subject", book_subjects)
                 cond = c3.selectbox("Condition", ["Like new", "Good", "Fair"])
                 mrp = c4.number_input("Original price (₹)", min_value=50, value=500, step=10)
                 price = st.slider("Your price (₹)", 10, int(mrp), int(mrp * 0.4))
