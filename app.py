@@ -476,36 +476,37 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 
 /* ---------- primary section navigation ---------- */
 .stTabs {{ margin: 0 0 30px; }}
-.stTabs [data-baseweb="tab-list"] {{
-  width:max-content; max-width:100%; margin-inline:auto;
-  display:flex; justify-content:center; align-items:center; gap:8px;
+.stTabs [data-baseweb="tab-list"], div[data-testid="stTabs"] [role="tablist"] {{
+  box-sizing:border-box; width:fit-content !important; max-width:100% !important;
+  margin:0 auto !important; display:flex; justify-content:center !important; align-items:center; gap:8px;
   border: 1px solid rgba(111,211,176,.13); border-radius: 18px;
   background: linear-gradient(110deg, rgba(17,31,29,.94), rgba(13,25,23,.88));
   box-shadow: 0 14px 36px -28px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.035);
-  padding: 10px; overflow-x: auto;
+  padding: 8px; overflow-x:auto;
 }}
-.stTabs [data-baseweb="tab"] {{
-  flex:0 0 auto; min-width:max-content; justify-content:center;
+.stTabs [data-baseweb="tab"], div[data-testid="stTabs"] [role="tab"] {{
+  box-sizing:border-box; flex:0 0 auto !important; min-width:max-content; justify-content:center;
   background: transparent !important; border: 1px solid transparent !important;
-  border-radius: 12px; padding: 12px 20px; height: auto;
-  color: {MUTE} !important; font-weight: 600; letter-spacing: .01em;
-  transition: color .18s ease, border-color .18s ease, background .18s ease, transform .18s ease;
+  border-radius: 12px !important; padding: 12px 22px; height: auto;
+  color: {MUTE} !important; font-weight: 600; letter-spacing: .015em;
+  transition: color .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
 }}
-.stTabs [data-baseweb="tab"]:hover {{
-  color: {TEXT} !important; background: rgba(255,255,255,.035) !important;
-  border-color: rgba(255,255,255,.18) !important; transform: translateY(-1px);
+.stTabs [data-baseweb="tab"]:hover, div[data-testid="stTabs"] [role="tab"]:hover {{
+  color: {TEXT} !important; background: rgba(255,255,255,.055) !important;
+  border-color: rgba(255,255,255,.3) !important; transform: translateY(-1px);
 }}
-.stTabs [data-baseweb="tab"][aria-selected="true"] {{
-  color: #FFFFFF !important; background: rgba(255,255,255,.045) !important;
-  border: 1px solid rgba(255,255,255,.88) !important;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 5px 18px -12px rgba(255,255,255,.32);
-  font-weight: 700;
+.stTabs [data-baseweb="tab"][aria-selected="true"], div[data-testid="stTabs"] [role="tab"][aria-selected="true"] {{
+  color:#FFFFFF !important; background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.045)) !important;
+  border:1px solid rgba(255,255,255,.92) !important;
+  box-shadow:0 0 0 2px rgba(255,255,255,.055),0 8px 22px -16px rgba(255,255,255,.55),inset 0 1px 0 rgba(255,255,255,.12);
+  font-weight:700; transform:translateY(-1px);
 }}
-.stTabs [data-baseweb="tab"] p {{ color: inherit !important; font-weight: inherit; }}
-.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display:none !important; }}
+.stTabs [data-baseweb="tab"] p, div[data-testid="stTabs"] [role="tab"] p {{ color:inherit !important; font-weight:inherit; }}
+.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"],
+div[data-testid="stTabs"] [data-baseweb="tab-highlight"], div[data-testid="stTabs"] [data-baseweb="tab-border"] {{ display:none !important; opacity:0 !important; }}
 @media (max-width: 640px) {{
-  .stTabs [data-baseweb="tab-list"] {{ width:100%; justify-content:center; gap:5px; padding:6px; }}
-  .stTabs [data-baseweb="tab"] {{ flex: 0 0 auto; padding: 10px 14px; }}
+  .stTabs [data-baseweb="tab-list"], div[data-testid="stTabs"] [role="tablist"] {{ width:100% !important; justify-content:center !important; gap:4px; padding:6px; }}
+  .stTabs [data-baseweb="tab"], div[data-testid="stTabs"] [role="tab"] {{ flex:0 0 auto !important; padding:10px 12px; font-size:.9rem; }}
 }}
 
 .stButton > button, .stDownloadButton > button, .stFormSubmitButton > button {{
