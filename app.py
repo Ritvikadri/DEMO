@@ -173,6 +173,8 @@ def show_auth_gate():
 
     splash_html = textwrap.dedent(f"""\
         <style>
+        :root {{ color-scheme:dark!important; --primary-color:#F2B138; --background-color:#0A1514; --secondary-background-color:#111F1D; --text-color:#E9F0ED; }}
+        html, body, .stApp, [data-testid="stAppViewContainer"] {{ background-color:#0A1514!important; color:#E9F0ED!important; }}
         .rl-auth-splash {{ position:fixed; inset:0; z-index:99999; display:grid; place-items:center;
           background:radial-gradient(circle at 50% 48%,#1D3932 0%,#0A1514 60%); color:#F4F7F5;
           animation:rl-splash-exit .85s ease-in-out 2.15s forwards; }}
@@ -187,11 +189,12 @@ def show_auth_gate():
         .stApp, [data-testid="stAppViewContainer"] {{
           background:radial-gradient(ellipse at 18% 8%,rgba(111,211,176,.12),transparent 34%),
                      radial-gradient(ellipse at 88% 22%,rgba(242,177,56,.10),transparent 30%),
-                     linear-gradient(145deg,#0A1514 0%,#101D1B 52%,#0A1514 100%);
+                     linear-gradient(145deg,#0A1514 0%,#101D1B 52%,#0A1514 100%)!important;
         }}
+        [data-testid="stMain"], .block-container {{ color:#E9F0ED!important; }}
         .rl-auth-title {{ max-width:760px; box-sizing:border-box; text-align:center; margin:34px auto 16px; padding:26px 28px 18px;
           border:1px solid rgba(111,211,176,.20); border-radius:24px;
-          background:radial-gradient(ellipse at 50% 0%,rgba(111,211,176,.11),transparent 68%),linear-gradient(145deg,rgba(23,42,39,.92),rgba(12,24,22,.92));
+          background:radial-gradient(ellipse at 50% 0%,rgba(111,211,176,.11),transparent 68%),linear-gradient(145deg,rgba(23,42,39,.92),rgba(12,24,22,.92))!important;
           box-shadow:0 24px 70px -42px rgba(111,211,176,.42),inset 0 1px 0 rgba(255,255,255,.045); }}
         .rl-auth-title h2 {{ margin:0; color:#F4F7F5; font-size:clamp(2rem,4vw,3rem); font-weight:800; letter-spacing:-.035em; }}
         .rl-auth-title p {{ color:#A6BBB4; margin:9px 0 2px; font-size:1.08rem; }}
@@ -213,10 +216,12 @@ def show_auth_gate():
           color:#FFFFFF!important; background:rgba(255,255,255,.055)!important; border-color:rgba(255,255,255,.25)!important;
         }}
         div[data-testid="stForm"] {{ box-sizing:border-box; max-width:760px; margin:12px auto 30px; padding:26px 28px;
-          border:1px solid rgba(111,211,176,.20); border-radius:22px;
-          background:linear-gradient(145deg,rgba(23,42,39,.88),rgba(12,24,22,.92));
+          border:1px solid rgba(111,211,176,.20)!important; border-radius:22px;
+          background:linear-gradient(145deg,rgba(23,42,39,.88),rgba(12,24,22,.92))!important;
           box-shadow:0 24px 70px -48px rgba(111,211,176,.32),inset 0 1px 0 rgba(255,255,255,.04); }}
         div[data-testid="stForm"] label {{ color:#E7EFEC!important; font-weight:600; }}
+        div[data-testid="stForm"] input {{ color:#F4F7F5!important; background:#172A27!important; border-color:#25413D!important; color-scheme:dark!important; }}
+        div[data-testid="stForm"] input::placeholder {{ color:#8FA8A2!important; }}
         div[data-testid="stForm"] .stFormSubmitButton > button {{ width:100%; min-height:58px; padding:16px 26px!important;
           border:1px solid rgba(255,255,255,.12)!important; border-radius:15px!important; color:#12332F!important;
           background:linear-gradient(135deg,#FFD45C,#F2B138)!important; font-size:1.12rem; font-weight:800;
@@ -329,13 +334,17 @@ CSS = f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap');
 
-html, body, [class*="css"], .stApp {{ font-family: 'DM Sans', sans-serif; color: {TEXT}; }}
-.stApp {{
+ :root {{ color-scheme: dark !important; --primary-color:{MARIGOLD}; --background-color:{BG}; --secondary-background-color:{SURFACE}; --text-color:{TEXT}; }}
+html, body, [class*="css"], .stApp {{ font-family: 'DM Sans', sans-serif !important; color: {TEXT} !important; color-scheme: dark !important; }}
+.stApp {{ --primary-color:{MARIGOLD} !important; --background-color:{BG} !important; --secondary-background-color:{SURFACE} !important; --text-color:{TEXT} !important; }}
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], section.main {{
   background:
     radial-gradient(1100px 520px at 95% -8%, rgba(242,177,56,.10), transparent 60%),
     radial-gradient(900px 500px at -5% 105%, rgba(111,211,176,.09), transparent 60%),
-    {BG};
+    {BG} !important;
 }}
+[data-testid="stSidebar"], [data-testid="stHeader"] {{ background-color:{BG} !important; color:{TEXT} !important; }}
+[data-testid="stMainBlockContainer"], .block-container {{ color:{TEXT} !important; }}
 h1, h2, h3, .rl-display {{ font-family: 'Bricolage Grotesque', sans-serif !important; letter-spacing: -0.02em; color: {TEXT}; }}
 h3 {{ font-size: 1.7rem !important; }}
 header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height: 0; }}
@@ -584,10 +593,16 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 [data-testid="stMetricValue"] {{ font-family: 'Bricolage Grotesque'; font-weight: 800; color: {MARIGOLD}; }}
 [data-testid="stMetricLabel"] p {{ color: {MUTE}; }}
 
-[data-baseweb="select"] > div, .stTextInput input, .stNumberInput input {{ background: {SURFACE} !important; border-color: {LINE} !important; border-radius: 12px !important; }}
-[data-testid="stFileUploaderDropzone"] {{ background: {SURFACE}; border: 1.5px dashed #3B6A63; border-radius: 16px; }}
-[data-testid="stExpander"] {{ background: {SURFACE}; border: 1px solid {LINE}; border-radius: 16px; }}
-[data-testid="stForm"] {{ background: {SURFACE}; border: 1px solid {LINE}; border-radius: 16px; }}
+[data-baseweb="select"] > div, [data-baseweb="input"] > div, .stTextInput input, .stNumberInput input, .stTextArea textarea {{
+  background:{SURFACE} !important; color:{TEXT} !important; border-color:{LINE} !important; border-radius:12px !important; color-scheme:dark !important;
+}}
+[data-baseweb="select"] [data-baseweb="select"] {{ background:{SURFACE} !important; color:{TEXT} !important; }}
+[data-baseweb="popover"], [data-baseweb="menu"], ul[role="listbox"] {{ background:{SURFACE2} !important; color:{TEXT} !important; }}
+[role="option"] {{ background:{SURFACE2} !important; color:{TEXT} !important; }}
+[data-testid="stFileUploaderDropzone"] {{ background:{SURFACE} !important; color:{TEXT} !important; border:1.5px dashed #3B6A63; border-radius:16px; }}
+[data-testid="stExpander"] {{ background:{SURFACE} !important; color:{TEXT} !important; border:1px solid {LINE}; border-radius:16px; }}
+[data-testid="stForm"] {{ background:{SURFACE} !important; color:{TEXT} !important; border:1px solid {LINE}; border-radius:16px; }}
+[data-testid="stAlert"] {{ color:{TEXT} !important; }}
 [data-testid="stDataFrame"], [data-testid="stImage"] img {{ border-radius: 16px; }}
 [data-testid="stCaptionContainer"] {{ color: {MUTE}; }}
 div[data-testid="stPopover"] > button {{ color:#fff !important; border-color:rgba(255,255,255,.24) !important; }}
