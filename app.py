@@ -1326,31 +1326,46 @@ if active_section == "Book Loop":
 
     if not active_mine:
         st.caption("You have no active book listings.")
-    for book in active_mine:
-        listing_id = str(book["id"])
-        name_col, sold_col = st.columns([5, 1.2], vertical_alignment="center")
-        name_col.markdown(
-            f"**{html.escape(book['title'])}** · ₹{int(book['price'])} · "
-            f"{counts.get(listing_id, 0)} request{'s' if counts.get(listing_id, 0) != 1 else ''}"
-        )
-        listing_requests = requests_by_listing.get(listing_id, [])
-        if listing_requests:
-            with st.expander(f"View buyer requests · {len(listing_requests)}"):
-                for request_index, request in enumerate(listing_requests, start=1):
-                    requester = requester_profiles.get(str(request.get("requester_id")), {})
-                    st.markdown(f"**Request {request_index}**")
-                    st.write(f"Name: {requester.get('full_name') or 'ReLoop member'}")
-                    st.write(f"Email: {requester.get('email') or 'Not available'}")
-                    st.write(f"Phone: {requester.get('phone') or 'Not available'}")
-                    if request_index < len(listing_requests):
-                        st.divider()
-        if sold_col.button("Sold", key=f"sold_{listing_id}", use_container_width=True):
-            try:
-                db_client().rpc("mark_book_sold", {"p_listing_id": int(book["id"])}).execute()
-                st.success("Marked sold. It’s removed from active listings and you earned 100 ReLoop points.")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Could not mark the book sold. Run the latest sales migration SQL. ({type(e).__name__})")
+    for row_start in range(0, len(active_mine), 3):
+        mine_cols = st.columns(3, gap="medium")
+        for seller_col, book in zip(mine_cols, active_mine[row_start:row_start + 3]):
+            with seller_col:
+                listing_id = str(book["id"])
+                listing_requests = requests_by_listing.get(listing_id, [])
+                request_count = counts.get(listing_id, 0)
+                saving = int(book["mrp"]) - int(book["price"])
+                accent = {"Physics": MARIGOLD, "Chemistry": MINT, "Maths": CORAL, "Biology": "#9DB7FF"}.get(book["subject"], MARIGOLD)
+                st.markdown(
+                    f"""<div class="rl-card" style="border-top:3px solid {accent}">
+                    <h4>{html.escape(book['title'])}</h4>
+                    <div class="rl-meta">Listed by {html.escape(book['seller_name'])}</div>
+                    <div style="margin:10px 0 2px 0"><span class="rl-price">₹{int(book['price'])}</span>
+                    <span class="rl-strike">₹{int(book['mrp'])}</span></div>
+                    <div class="rl-meta">You save ₹{saving}</div>
+                    <span class="rl-tag">{html.escape(book['exam'])}</span>
+                    <span class="rl-tag">{html.escape(book['subject'])}</span>
+                    <span class="rl-tag">{html.escape(book['condition'])}</span>
+                    <div class="rl-meta" style="margin-top:12px">Your listing · {request_count} buyer request{'s' if request_count != 1 else ''}</div>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
+                if listing_requests:
+                    with st.expander(f"View buyer requests · {len(listing_requests)}"):
+                        for request_index, request in enumerate(listing_requests, start=1):
+                            requester = requester_profiles.get(str(request.get("requester_id")), {})
+                            st.markdown(f"**Request {request_index}**")
+                            st.write(f"Name: {requester.get('full_name') or 'ReLoop member'}")
+                            st.write(f"Email: {requester.get('email') or 'Not available'}")
+                            st.write(f"Phone: {requester.get('phone') or 'Not available'}")
+                            if request_index < len(listing_requests):
+                                st.divider()
+                if st.button("Sold", key=f"sold_{listing_id}", use_container_width=True):
+                    try:
+                        db_client().rpc("mark_book_sold", {"p_listing_id": int(book["id"])}).execute()
+                        st.success("Marked sold. It’s removed from active listings and you earned 100 ReLoop points.")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Could not mark the book sold. Run the latest sales migration SQL. ({type(e).__name__})")
 
 # ----------------------------------------------------------------------------
 # Sound Check
