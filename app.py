@@ -683,7 +683,7 @@ st.markdown(
 <div class="rl-hero">
   <div>
     <span class="rl-pill">Team Sutra · Ideathon 2026</span>
-    <h1 class="rl-display">Know what it's worth before you sell it.</h1>
+    <h1 class="rl-display">Know what it's WORTH before you sell it.</h1>
     <p>Reuse it, resell it, or recycle it. ReLoop helps you decide, in that order.</p>
     <div class="rl-chips">
       <span class="rl-chip"><b>Scrap</b> priced by photo</span>
