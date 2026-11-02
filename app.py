@@ -496,14 +496,24 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
   border-color: rgba(255,255,255,.3) !important; transform: translateY(-1px);
 }}
 .stTabs [data-baseweb="tab"][aria-selected="true"], div[data-testid="stTabs"] [role="tab"][aria-selected="true"] {{
-  color:#FFFFFF !important; background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.045)) !important;
-  border:1px solid rgba(255,255,255,.92) !important;
-  box-shadow:0 0 0 2px rgba(255,255,255,.055),0 8px 22px -16px rgba(255,255,255,.55),inset 0 1px 0 rgba(255,255,255,.12);
+  color:#FFFFFF !important; background-color:rgba(255,255,255,.075) !important; background-image:none !important;
+  border:1px solid rgba(255,255,255,.92) !important; border-bottom:1px solid rgba(255,255,255,.92) !important;
+  box-shadow:0 0 0 2px rgba(255,255,255,.055),0 8px 22px -16px rgba(255,255,255,.55),inset 0 1px 0 rgba(255,255,255,.12) !important;
   font-weight:700; transform:translateY(-1px);
 }}
 .stTabs [data-baseweb="tab"] p, div[data-testid="stTabs"] [role="tab"] p {{ color:inherit !important; font-weight:inherit; }}
 .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"],
-div[data-testid="stTabs"] [data-baseweb="tab-highlight"], div[data-testid="stTabs"] [data-baseweb="tab-border"] {{ display:none !important; opacity:0 !important; }}
+div[data-testid="stTabs"] [data-baseweb="tab-highlight"], div[data-testid="stTabs"] [data-baseweb="tab-border"],
+.stTabs [role="tab"]::after, .stTabs [role="tab"]::before,
+div[data-testid="stTabs"] [role="tab"]::after, div[data-testid="stTabs"] [role="tab"]::before,
+div[data-testid="stTabs"] [role="tablist"] > div[aria-hidden="true"] {{
+  content:none !important; display:none !important; visibility:hidden !important; opacity:0 !important;
+  border:0 !important; box-shadow:none !important; background:none !important;
+}}
+div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] {{ display:none !important; visibility:hidden !important; opacity:0 !important; }}
+.stTabs [role="tab"][aria-selected="true"], div[data-testid="stTabs"] [role="tab"][aria-selected="true"] {{
+  border-bottom-color:rgba(255,255,255,.92) !important;
+}}
 @media (max-width: 640px) {{
   .stTabs [data-baseweb="tab-list"], div[data-testid="stTabs"] [role="tablist"] {{ width:100% !important; justify-content:center !important; gap:4px; padding:6px; }}
   .stTabs [data-baseweb="tab"], div[data-testid="stTabs"] [role="tab"] {{ flex:0 0 auto !important; padding:10px 12px; font-size:.9rem; }}
