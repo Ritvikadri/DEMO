@@ -312,7 +312,12 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-verdict p {{ margin: 10px 0 0 0; opacity: .92; max-width: 40ch; }}
 
 /* ---------- impact dashboard ---------- */
-.rl-imp-hero {{ position: relative; overflow: hidden; height: 100%; min-height: 250px; border-radius: 26px; padding: 30px 34px;
+.rl-imp-grid {{ display: grid; gap: 24px; margin: 0 0 26px 0; align-items: stretch; }}
+.rl-imp-grid.g-head {{ grid-template-columns: 2fr 1fr; }}
+.rl-imp-grid.g-three {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
+.rl-imp-grid.g-detail {{ grid-template-columns: 1fr 1.4fr; }}
+.rl-imp-grid > div {{ box-sizing: border-box; min-width: 0; }}
+.rl-imp-hero {{ position: relative; overflow: hidden; box-sizing: border-box; min-height: 250px; border-radius: 26px; padding: 30px 34px;
   background:
     radial-gradient(520px 260px at 100% 0%, rgba(242,177,56,.26), transparent 62%),
     radial-gradient(440px 280px at 0% 100%, rgba(111,211,176,.16), transparent 62%),
@@ -327,7 +332,7 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-imp-split span {{ background: rgba(255,255,255,.05); border: 1px solid {LINE}; border-radius: 12px; padding: 8px 14px; color: {MUTE}; font-size: .9rem; }}
 .rl-imp-split b {{ color: {TEXT}; font-weight: 700; margin-right: 4px; font-variant-numeric: tabular-nums; }}
 
-.rl-imp-level {{ height: 100%; min-height: 250px; border-radius: 26px; padding: 26px 28px; border: 1px solid {LINE};
+.rl-imp-level {{ box-sizing: border-box; min-height: 250px; border-radius: 26px; padding: 26px 28px; border: 1px solid {LINE};
   background: linear-gradient(180deg, {SURFACE2} 0%, {SURFACE} 100%); box-shadow: 0 18px 40px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.04); }}
 .rl-imp-levelrow {{ display: flex; align-items: center; gap: 16px; margin: 16px 0 18px 0; }}
 .rl-imp-badge {{ width: 60px; height: 60px; flex: none; border-radius: 18px; display: grid; place-items: center; font-size: 1.9rem;
@@ -339,8 +344,11 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-imp-next {{ color: {TEXT}; font-size: .92rem; margin-top: 10px; }}
 .rl-imp-tip {{ color: {MUTE}; font-size: .85rem; margin-top: 6px; }}
 
-.rl-imp-panel {{ height: 100%; min-height: 330px; border-radius: 20px; padding: 20px 22px; border: 1px solid {LINE}; border-top: 3px solid var(--accent, {MARIGOLD});
-  background: linear-gradient(180deg, {SURFACE2} 0%, {SURFACE} 100%); box-shadow: 0 18px 40px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.04); }}
+.rl-imp-panel {{ box-sizing: border-box; border-radius: 22px; padding: 22px 24px; border: 1px solid {LINE};
+  background: linear-gradient(180deg, {SURFACE2} 0%, {SURFACE} 100%);
+  background: radial-gradient(340px 150px at 0% 0%, color-mix(in srgb, var(--accent, {MARIGOLD}) 16%, transparent), transparent 72%),
+              linear-gradient(180deg, {SURFACE2} 0%, {SURFACE} 100%);
+  box-shadow: 0 18px 40px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.04); }}
 .rl-imp-panel-head {{ display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }}
 .rl-imp-icon {{ width: 42px; height: 42px; flex: none; border-radius: 13px; display: grid; place-items: center; font-size: 1.3rem; }}
 .rl-imp-panel h4 {{ margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.15rem; color: {TEXT}; line-height: 1.2; }}
@@ -365,8 +373,9 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-imp-item .t span {{ color: {MUTE}; font-size: .85rem; }}
 .rl-imp-amt {{ font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 1.05rem; white-space: nowrap; }}
 @media (max-width: 900px) {{
+  .rl-imp-grid.g-head, .rl-imp-grid.g-three, .rl-imp-grid.g-detail {{ grid-template-columns: 1fr; gap: 18px; }}
   .rl-imp-big {{ font-size: 2.8rem; }}
-  .rl-imp-panel {{ min-height: 0; }}
+  .rl-imp-hero, .rl-imp-level {{ min-height: 0; }}
 }}
 
 /* ---------- workspace label row (sits directly under the logo) ---------- */
@@ -1352,9 +1361,7 @@ with tab_impact:
         '<div class="rl-imp-tip">Earn 100 points every time a listed book is sold.</div>'
         '</div>'
     )
-    hero_col, level_col = st.columns([2, 1], gap="medium")
-    hero_col.markdown(hero_html, unsafe_allow_html=True)
-    level_col.markdown(level_html, unsafe_allow_html=True)
+    st.markdown(f'<div class="rl-imp-grid g-head">{hero_html}{level_html}</div>', unsafe_allow_html=True)
 
     # ---- Row 2: scrap, books, appliances ----
     scrap_body = (
@@ -1376,10 +1383,14 @@ with tab_impact:
     if not verdict_total:
         verdict_body += '<div class="rl-imp-empty">Record a fan or mixer on the Sound Check tab and save the verdict to see it here.</div>'
 
-    p1, p2, p3 = st.columns(3, gap="medium")
-    p1.markdown(imp_panel("♻️", "Scrap", "Photo valuations", MINT, scrap_body), unsafe_allow_html=True)
-    p2.markdown(imp_panel("📚", "Books", "Book Loop activity", "#9DB7FF", books_body), unsafe_allow_html=True)
-    p3.markdown(imp_panel("🔊", "Appliance verdicts", f"{verdict_total} checked", CORAL, verdict_body), unsafe_allow_html=True)
+    st.markdown(
+        '<div class="rl-imp-grid g-three">'
+        + imp_panel("♻️", "Scrap", "Photo valuations", MINT, scrap_body)
+        + imp_panel("📚", "Books", "Book Loop activity", "#9DB7FF", books_body)
+        + imp_panel("🔊", "Appliance verdicts", f"{verdict_total} checked", CORAL, verdict_body)
+        + '</div>',
+        unsafe_allow_html=True,
+    )
 
     # ---- Row 3: what you valued + recent activity ----
     top_materials = sorted(material_kg.items(), key=lambda kv: -kv[1])[:6]
@@ -1398,6 +1409,10 @@ with tab_impact:
     else:
         feed_body = '<div class="rl-imp-empty">Nothing here yet. Your scrap valuations, book requests, sales and sound checks will appear as you use ReLoop.</div>'
 
-    m_col, f_col = st.columns([1, 1.4], gap="medium")
-    m_col.markdown(imp_panel("⚖️", "Scrap by material", "Total weight you have valued", MARIGOLD, mat_body), unsafe_allow_html=True)
-    f_col.markdown(imp_panel("🕒", "Recent activity", "Your latest actions", MINT, feed_body), unsafe_allow_html=True)
+    st.markdown(
+        '<div class="rl-imp-grid g-detail">'
+        + imp_panel("⚖️", "Scrap by material", "Total weight you have valued", MARIGOLD, mat_body)
+        + imp_panel("🕒", "Recent activity", "Your latest actions", MINT, feed_body)
+        + '</div>',
+        unsafe_allow_html=True,
+    )
