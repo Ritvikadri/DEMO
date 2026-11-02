@@ -311,12 +311,38 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-verdict .v {{ font-family:'Bricolage Grotesque'; font-size: 3rem; font-weight: 800; line-height: 1; margin-top: 6px; }}
 .rl-verdict p {{ margin: 10px 0 0 0; opacity: .92; max-width: 40ch; }}
 
-/* ---------- streamlit widgets ---------- */
-.stTabs [data-baseweb="tab-list"] {{ gap: 8px; border-bottom: 0; padding-bottom: 6px; }}
-.stTabs [data-baseweb="tab"] {{ background: {SURFACE}; border: 1px solid {LINE}; border-radius: 14px; padding: 10px 22px; height: auto; color: {MUTE}; font-weight: 500; }}
-.stTabs [data-baseweb="tab"]:hover {{ color: {TEXT}; border-color: #3B6A63; }}
-.stTabs [aria-selected="true"] {{ background: {MARIGOLD} !important; color: {SPRUCE} !important; border-color: {MARIGOLD} !important; font-weight: 700; }}
-.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display:none; }}
+/* ---------- primary section navigation ---------- */
+.stTabs {{ margin: 28px 0 30px; }}
+.stTabs [data-baseweb="tab-list"] {{
+  display: flex; justify-content: center; align-items: center; gap: 12px;
+  border: 1px solid rgba(111,211,176,.13); border-radius: 18px;
+  background: linear-gradient(110deg, rgba(17,31,29,.94), rgba(13,25,23,.88));
+  box-shadow: 0 14px 36px -28px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.035);
+  padding: 10px; overflow-x: auto;
+}}
+.stTabs [data-baseweb="tab"] {{
+  flex: 1 1 0; min-width: max-content; justify-content: center;
+  background: transparent !important; border: 1px solid transparent !important;
+  border-radius: 12px; padding: 12px 20px; height: auto;
+  color: {MUTE} !important; font-weight: 600; letter-spacing: .01em;
+  transition: color .18s ease, border-color .18s ease, background .18s ease, transform .18s ease;
+}}
+.stTabs [data-baseweb="tab"]:hover {{
+  color: {TEXT} !important; background: rgba(255,255,255,.035) !important;
+  border-color: rgba(255,255,255,.18) !important; transform: translateY(-1px);
+}}
+.stTabs [data-baseweb="tab"][aria-selected="true"] {{
+  color: #FFFFFF !important; background: rgba(255,255,255,.045) !important;
+  border: 1px solid rgba(255,255,255,.88) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 5px 18px -12px rgba(255,255,255,.32);
+  font-weight: 700;
+}}
+.stTabs [data-baseweb="tab"] p {{ color: inherit !important; font-weight: inherit; }}
+.stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display:none !important; }}
+@media (max-width: 640px) {{
+  .stTabs [data-baseweb="tab-list"] {{ justify-content: flex-start; gap: 6px; padding: 7px; }}
+  .stTabs [data-baseweb="tab"] {{ flex: 0 0 auto; padding: 10px 14px; }}
+}}
 
 .stButton > button, .stDownloadButton > button, .stFormSubmitButton > button {{
   border-radius: 12px; border: 0; background: {MARIGOLD}; color: {SPRUCE}; font-weight: 700; padding: 9px 20px;
@@ -683,7 +709,7 @@ st.markdown(
 <div class="rl-hero">
   <div>
     <span class="rl-pill">Team Sutra · Ideathon 2026</span>
-    <h1 class="rl-display">Know what it's WORTH before you sell it.</h1>
+    <h1 class="rl-display">Know what it's worth before you sell it.</h1>
     <p>Reuse it, resell it, or recycle it. ReLoop helps you decide, in that order.</p>
     <div class="rl-chips">
       <span class="rl-chip"><b>Scrap</b> priced by photo</span>
