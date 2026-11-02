@@ -84,45 +84,61 @@ def render_brand(size=72, show_account=False):
         default_phone = profile.get("phone") or st.session_state.auth_user.get("phone") or metadata.get("phone") or ""
 
         with account_col:
-            with st.popover("👤 Account", use_container_width=True):
-                st.markdown("### Your account")
-                st.caption("Edit the details shown on your ReLoop account and book listings.")
-                if profile_error:
-                    st.warning("Run the latest Supabase account migration to enable profile editing.")
-                with st.form("account_profile_form"):
-                    new_name = st.text_input("Name", value=default_name, key="account_name")
-                    new_email = st.text_input("Email", value=email_now, key="account_email")
-                    new_phone = st.text_input("Phone number", value=default_phone, key="account_phone")
-                    save_profile = st.form_submit_button("Save changes", use_container_width=True)
-                if save_profile:
-                    if not new_name.strip():
-                        st.error("Enter your name.")
-                    elif "@" not in new_email or "." not in new_email.rsplit("@", 1)[-1]:
-                        st.error("Enter a valid email address.")
-                    elif sum(ch.isdigit() for ch in new_phone) < 7:
-                        st.error("Enter a valid phone number.")
-                    else:
+            account_logo_col, account_menu_col = st.columns([0.32, 1.5], vertical_alignment="center")
+            account_logo_col.markdown(
+                f'<div style="display:flex;justify-content:center"><img src="data:image/png;base64,{logo_data}" '
+                'alt="ReLoop" style="width:25px;height:25px;object-fit:contain;filter:grayscale(1) brightness(0) invert(1)"></div>',
+                unsafe_allow_html=True,
+            )
+            with account_menu_col:
+                with st.popover("Account", use_container_width=True):
+                    st.markdown("### Your account")
+                    st.caption("Edit the details shown on your ReLoop account and book listings.")
+                    if profile_error:
+                        st.warning("Run the latest Supabase account migration to enable profile editing.")
+                    with st.form("account_profile_form"):
+                        new_name = st.text_input("Name", value=default_name, key="account_name")
+                        new_email = st.text_input("Email", value=email_now, key="account_email")
+                        new_phone = st.text_input("Phone number", value=default_phone, key="account_phone")
+                        save_profile = st.form_submit_button("Save changes", use_container_width=True)
+                    if save_profile:
+                        if not new_name.strip():
+                            st.error("Enter your name.")
+                        elif "@" not in new_email or "." not in new_email.rsplit("@", 1)[-1]:
+                            st.error("Enter a valid email address.")
+                        elif sum(ch.isdigit() for ch in new_phone) < 7:
+                            st.error("Enter a valid phone number.")
+                        else:
+                            try:
+                                attrs = {"data": {"full_name": new_name.strip(), "phone": new_phone.strip()}}
+                                email_changed = new_email.strip().lower() != email_now.lower()
+                                if email_changed:
+                                    attrs["email"] = new_email.strip()
+                                client.auth.update_user(attrs)
+                                client.table("user_profiles").upsert({
+                                    "user_id": user_id,
+                                    "email": email_now if email_changed else new_email.strip(),
+                                    "full_name": new_name.strip(),
+                                    "phone": new_phone.strip(),
+                                }, on_conflict="user_id").execute()
+                                st.session_state.auth_user["name"] = new_name.strip()
+                                st.session_state.auth_user["phone"] = new_phone.strip()
+                                if email_changed:
+                                    st.info("Confirm the email change using the link sent by Supabase. Your current email remains active until confirmation.")
+                                else:
+                                    st.success("Account details updated.")
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Could not update your account. ({type(e).__name__})")
+
+                    st.divider()
+                    if st.button("Log out", key="account_logout", use_container_width=True):
                         try:
-                            attrs = {"data": {"full_name": new_name.strip(), "phone": new_phone.strip()}}
-                            email_changed = new_email.strip().lower() != email_now.lower()
-                            if email_changed:
-                                attrs["email"] = new_email.strip()
-                            client.auth.update_user(attrs)
-                            client.table("user_profiles").upsert({
-                                "user_id": user_id,
-                                "email": email_now if email_changed else new_email.strip(),
-                                "full_name": new_name.strip(),
-                                "phone": new_phone.strip(),
-                            }, on_conflict="user_id").execute()
-                            st.session_state.auth_user["name"] = new_name.strip()
-                            st.session_state.auth_user["phone"] = new_phone.strip()
-                            if email_changed:
-                                st.info("Confirm the email change using the link sent by Supabase. Your current email remains active until confirmation.")
-                            else:
-                                st.success("Account details updated.")
+                            client.auth.sign_out()
+                        finally:
+                            for key in ("auth_user", "auth_token", "supabase_client"):
+                                st.session_state.pop(key, None)
                             st.rerun()
-                        except Exception as e:
-                            st.error(f"Could not update your account. ({type(e).__name__})")
 
 
 @lru_cache(maxsize=1)
@@ -146,21 +162,39 @@ def show_auth_gate():
 
     if user:
         st.sidebar.caption(f"Signed in: {user['email']}")
-        if st.sidebar.button("Log out", key="auth_logout"):
-            try:
-                client.auth.sign_out()
-            finally:
-                for key in ("auth_user", "auth_token", "supabase_client"):
-                    st.session_state.pop(key, None)
-                st.rerun()
         # Attach this user's JWT to database API calls so RLS sees the user.
         token = st.session_state.get("auth_token")
         if token:
             client.postgrest.auth(token)
         return user
 
-    render_brand(88)
-    st.subheader("Welcome — log in or create an account")
+    st.markdown(
+        f'''<style>
+        .rl-auth-splash {{ position:fixed; inset:0; z-index:99999; display:grid; place-items:center;
+          background:radial-gradient(circle at 50% 48%,#1D3932 0%,#0A1514 60%); color:#F4F7F5;
+          animation:rl-splash-exit .85s ease-in-out 2.15s forwards; }}
+        .rl-auth-splash-inner {{ display:flex; flex-direction:column; align-items:center; gap:13px; animation:rl-splash-arrive 1.1s cubic-bezier(.2,.8,.2,1) both; }}
+        .rl-auth-splash img {{ width:128px; height:128px; object-fit:contain; filter:drop-shadow(0 0 22px rgba(145,195,85,.42)); animation:rl-logo-turn 1.7s cubic-bezier(.2,.7,.3,1) both; }}
+        .rl-auth-splash strong {{ font-size:2.15rem; letter-spacing:.02em; opacity:0; animation:rl-title-in .55s ease .65s forwards; }}
+        .rl-auth-splash span {{ color:#A8C7B8; font-size:.88rem; letter-spacing:.18em; text-transform:uppercase; opacity:0; animation:rl-title-in .5s ease .95s forwards; }}
+        @keyframes rl-splash-arrive {{ from {{ transform:translateY(16px) scale(.84); opacity:0 }} to {{ transform:translateY(0) scale(1); opacity:1 }} }}
+        @keyframes rl-logo-turn {{ from {{ transform:rotate(-100deg) scale(.65) }} to {{ transform:rotate(0) scale(1) }} }}
+        @keyframes rl-title-in {{ to {{ opacity:1 }} }}
+        @keyframes rl-splash-exit {{ to {{ opacity:0; visibility:hidden; pointer-events:none }} }}
+        .rl-auth-title {{ text-align:center; margin:14px 0 8px; }}
+        .rl-auth-title h2 {{ margin:0; color:#E9F0ED; }}
+        .rl-auth-title p {{ color:#8FA8A2; margin:7px 0 20px; }}
+        .stTabs [data-baseweb="tab-list"] {{ justify-content:center; gap:18px; }}
+        .stTabs [data-baseweb="tab"][aria-selected="true"] {{ color:#fff!important; background:rgba(255,255,255,.045)!important; border:1px solid rgba(255,255,255,.78)!important; border-radius:11px; }}
+        div[data-testid="stForm"] {{ max-width:760px; margin:0 auto; }}
+        @media (prefers-reduced-motion:reduce) {{ .rl-auth-splash,.rl-auth-splash * {{ animation-duration:.01ms!important; animation-delay:0ms!important; }} }}
+        </style>
+        <div class="rl-auth-splash"><div class="rl-auth-splash-inner">
+          <img src="{reloop_logo_uri()}" alt="ReLoop logo"><strong>ReLoop</strong><span>Reuse · Resell · Recycle</span>
+        </div></div>''',
+        unsafe_allow_html=True,
+    )
+    st.markdown('<div class="rl-auth-title"><h2>Welcome to ReLoop</h2><p>Log in or create an account to continue</p></div>', unsafe_allow_html=True)
     login_tab, signup_tab = st.tabs(["Log in", "Sign up"])
 
     with login_tab:
@@ -300,11 +334,20 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 @keyframes rl-scroll {{ from {{ transform: translateX(0); }} to {{ transform: translateX(-50%); }} }}
 @media (prefers-reduced-motion: reduce) {{ .rl-track {{ animation: none; }} }}
 
-/* flow */
-.rl-flow {{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 14px 0 26px 0; }}
-.rl-flow div {{ background: {SURFACE}; border: 1px solid {LINE}; border-left: 3px solid {MARIGOLD}; border-radius: 14px; padding: 14px 18px; }}
-.rl-flow b {{ display:block; font-family:'Bricolage Grotesque'; font-size: 1.08rem; color: {TEXT}; }}
-.rl-flow span {{ color: {MUTE}; font-size: .9rem; }}
+/* four-step circular flow */
+.rl-flow {{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:18px 0 28px; }}
+.rl-flow div {{ position:relative; isolation:isolate; overflow:hidden; min-height:120px; padding:19px 20px 17px;
+  border:1px solid transparent; border-radius:18px;
+  background:linear-gradient(145deg,rgba(20,39,36,.98),rgba(12,25,23,.98)) padding-box,
+    linear-gradient(135deg,rgba(111,211,176,.72),rgba(242,177,56,.68),rgba(111,211,176,.18)) border-box;
+  box-shadow:0 16px 36px -28px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.055);
+  transition:transform .2s ease,box-shadow .2s ease; }}
+.rl-flow div::after {{ content:""; position:absolute; z-index:-1; width:130px; height:130px; right:-62px; top:-72px;
+  border-radius:50%; background:radial-gradient(circle,rgba(111,211,176,.14),transparent 68%); }}
+.rl-flow div:hover {{ transform:translateY(-4px); box-shadow:0 20px 42px -26px rgba(111,211,176,.24),inset 0 1px 0 rgba(255,255,255,.08); }}
+.rl-flow .rl-step {{ display:block; color:{MINT}; font-size:.7rem; font-weight:700; letter-spacing:.16em; margin-bottom:11px; }}
+.rl-flow b {{ display:block; font-family:'Bricolage Grotesque'; font-size:1.14rem; color:{TEXT}; margin-bottom:5px; }}
+.rl-flow span:last-child {{ color:{MUTE}; font-size:.9rem; }}
 
 /* ---------- dealer cards: equal size, button pinned to the bottom ---------- */
 .rl-dealer-grid {{ display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; align-items: stretch; margin: 6px 0 14px 0; }}
@@ -433,14 +476,15 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 /* ---------- primary section navigation ---------- */
 .stTabs {{ margin: 0 0 30px; }}
 .stTabs [data-baseweb="tab-list"] {{
-  display: flex; justify-content: center; align-items: center; gap: 12px;
+  width:max-content; max-width:100%; margin-inline:auto;
+  display:flex; justify-content:center; align-items:center; gap:8px;
   border: 1px solid rgba(111,211,176,.13); border-radius: 18px;
   background: linear-gradient(110deg, rgba(17,31,29,.94), rgba(13,25,23,.88));
   box-shadow: 0 14px 36px -28px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.035);
   padding: 10px; overflow-x: auto;
 }}
 .stTabs [data-baseweb="tab"] {{
-  flex: 1 1 0; min-width: max-content; justify-content: center;
+  flex:0 0 auto; min-width:max-content; justify-content:center;
   background: transparent !important; border: 1px solid transparent !important;
   border-radius: 12px; padding: 12px 20px; height: auto;
   color: {MUTE} !important; font-weight: 600; letter-spacing: .01em;
@@ -459,7 +503,7 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .stTabs [data-baseweb="tab"] p {{ color: inherit !important; font-weight: inherit; }}
 .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] {{ display:none !important; }}
 @media (max-width: 640px) {{
-  .stTabs [data-baseweb="tab-list"] {{ justify-content: flex-start; gap: 6px; padding: 7px; }}
+  .stTabs [data-baseweb="tab-list"] {{ width:100%; justify-content:center; gap:5px; padding:6px; }}
   .stTabs [data-baseweb="tab"] {{ flex: 0 0 auto; padding: 10px 14px; }}
 }}
 
@@ -490,6 +534,9 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 [data-testid="stForm"] {{ background: {SURFACE}; border: 1px solid {LINE}; border-radius: 16px; }}
 [data-testid="stDataFrame"], [data-testid="stImage"] img {{ border-radius: 16px; }}
 [data-testid="stCaptionContainer"] {{ color: {MUTE}; }}
+div[data-testid="stPopover"] > button {{ color:#fff !important; border-color:rgba(255,255,255,.24) !important; }}
+div[data-testid="stPopover"] > button:hover {{ color:#fff !important; border-color:rgba(255,255,255,.62) !important; }}
+button[data-testid="stPopoverButton"] {{ color:#fff !important; }}
 
 @media (max-width: 900px) {{
   .rl-hero {{ grid-template-columns: 1fr; padding: 30px 24px; }}
@@ -602,7 +649,7 @@ def load_requests_for_listings(listing_ids):
 def load_contact_profiles(user_ids):
     if not user_ids:
         return {}
-    rows = (db_client().table("user_profiles").select("user_id, email, phone")
+    rows = (db_client().table("user_profiles").select("user_id, full_name, email, phone")
             .in_("user_id", list(user_ids)).execute().data or [])
     return {str(row["user_id"]): row for row in rows}
 
@@ -758,7 +805,7 @@ DEFAULT_KG = {"Newspaper / paper": 6.0, "Cardboard": 4.0, "Plastic (mixed)": 3.0
 
 
 def pick_df(picks):
-    picks = picks or ["Newspaper / paper"]
+    picks = picks or []
     return pd.DataFrame([(m, DEFAULT_KG[m]) for m in picks], columns=["Material", "Weight (kg)"])
 
 
@@ -785,13 +832,37 @@ def read_wav(raw: bytes):
     return sr, x[: sr * 12]  # use at most 12 seconds
 
 
-def analyze_audio(raw: bytes):
+def decode_audio(raw: bytes, filename=""):
+    """Decode WAV directly and use PyAV to convert MP3 and other common uploads to mono WAV samples."""
+    if filename.lower().endswith(".wav"):
+        return read_wav(raw)
+
+    import av
+
+    sample_rate = 22050
+    samples = []
+    with av.open(io.BytesIO(raw)) as container:
+        audio_stream = next((stream for stream in container.streams if stream.type == "audio"), None)
+        if audio_stream is None:
+            raise ValueError("No audio stream found")
+        resampler = av.AudioResampler(format="fltp", layout="mono", rate=sample_rate)
+        for frame in container.decode(audio_stream):
+            for converted in resampler.resample(frame):
+                samples.append(converted.to_ndarray().astype(np.float32).reshape(-1))
+        for converted in resampler.resample(None):
+            samples.append(converted.to_ndarray().astype(np.float32).reshape(-1))
+    if not samples:
+        raise ValueError("No audio samples found")
+    return sample_rate, np.concatenate(samples)[: sample_rate * 12]
+
+
+def analyze_audio(raw: bytes, filename=""):
     """
     Prototype heuristic standing in for a fine-tuned YAMNet classifier.
     A healthy fan or mixer gives a steady, tonal hum. Faults show up as unstable loudness,
     noisy (flat) spectrum and extra high-frequency rattle.
     """
-    sr, x = read_wav(raw)
+    sr, x = decode_audio(raw, filename)
     x = x - np.mean(x)
     rms = float(np.sqrt(np.mean(x ** 2)))
     if rms < 0.004:
@@ -879,10 +950,10 @@ tab_scrap.markdown(
 </div>
 <div class="rl-ticker"><div class="rl-track">{ticker}{ticker}</div></div>
 <div class="rl-flow">
-  <div><b>Capture</b><span>photo, book or sound</span></div>
-  <div><b>Analyse</b><span>vision and audio AI</span></div>
-  <div><b>Decide</b><span>value, resell or scrap</span></div>
-  <div><b>Connect</b><span>kabadiwala or buyer</span></div>
+  <div><span class="rl-step">01 · START</span><b>Capture</b><span>Photo, book or sound</span></div>
+  <div><span class="rl-step">02 · UNDERSTAND</span><b>Analyse</b><span>Vision and audio AI</span></div>
+  <div><span class="rl-step">03 · CHOOSE</span><b>Decide</b><span>Value, resell or recycle</span></div>
+  <div><span class="rl-step">04 · COMPLETE</span><b>Connect</b><span>Local collector or buyer</span></div>
 </div>
 """,
     unsafe_allow_html=True,
@@ -957,7 +1028,7 @@ with tab_scrap:
             picks = st.multiselect(
                 "Quick pick: what is in the pile?",
                 list(RATES),
-                default=["Newspaper / paper"],
+                default=[],
                 help="Used for a photo when AI analysis is not available. You can edit the weights on the right.",
             )
             if st.button("Identify materials", key="detect"):
@@ -989,7 +1060,10 @@ with tab_scrap:
 
     with right:
         if st.session_state.scrap_df is None:
-            st.session_state.scrap_df = pd.DataFrame([("Newspaper / paper", 5.0)], columns=["Material", "Weight (kg)"])
+            st.session_state.scrap_df = pd.DataFrame({
+                "Material": pd.Series(dtype="object"),
+                "Weight (kg)": pd.Series(dtype="float64"),
+            })
         st.markdown("**All photos combined. Check and edit.**")
         df = st.data_editor(
             st.session_state.scrap_df,
@@ -1208,8 +1282,13 @@ with tab_books:
                     except Exception as e:
                         st.error(f"Could not save the listing. Check Supabase SQL. ({type(e).__name__})")
 
-    # Seller's active inventory appears below the books available to buy.
-    st.markdown("### My books for sale")
+    # Keep the seller's inventory visually separate and after the buyable listings.
+    st.divider()
+    inventory_title, refresh_col = st.columns([4.5, 1.5], vertical_alignment="center")
+    inventory_title.markdown("### Your books for sale")
+    if refresh_col.button("↻ Check requests", key="refresh_my_book_requests", use_container_width=True):
+        st.rerun()
+    st.caption("Your active listings and buyer requests are private to your account.")
     try:
         my_listings = load_my_book_listings()
         my_requests = load_requests_for_listings([row["id"] for row in my_listings])
@@ -1217,9 +1296,19 @@ with tab_books:
         my_listings, my_requests = [], []
         st.error(f"Could not load your listings and requests. ({type(e).__name__})")
     counts = {}
+    requests_by_listing = {}
     for request in my_requests:
         key = str(request["listing_id"])
         counts[key] = counts.get(key, 0) + 1
+        requests_by_listing.setdefault(key, []).append(request)
+    requester_ids = {
+        str(request["requester_id"])
+        for request in my_requests if request.get("requester_id")
+    }
+    try:
+        requester_profiles = load_contact_profiles(requester_ids)
+    except Exception:
+        requester_profiles = {}
     active_mine = [book for book in my_listings if book.get("status", "active") == "active"]
 
     if not active_mine:
@@ -1228,8 +1317,20 @@ with tab_books:
         listing_id = str(book["id"])
         name_col, sold_col = st.columns([5, 1.2], vertical_alignment="center")
         name_col.markdown(
-            f"**{html.escape(book['title'])}** · ₹{int(book['price'])} · {counts.get(listing_id, 0)} request(s)"
+            f"**{html.escape(book['title'])}** · ₹{int(book['price'])} · "
+            f"{counts.get(listing_id, 0)} request{'s' if counts.get(listing_id, 0) != 1 else ''}"
         )
+        listing_requests = requests_by_listing.get(listing_id, [])
+        if listing_requests:
+            with st.expander(f"View buyer requests · {len(listing_requests)}"):
+                for request_index, request in enumerate(listing_requests, start=1):
+                    requester = requester_profiles.get(str(request.get("requester_id")), {})
+                    st.markdown(f"**Request {request_index}**")
+                    st.write(f"Name: {requester.get('full_name') or 'ReLoop member'}")
+                    st.write(f"Email: {requester.get('email') or 'Not available'}")
+                    st.write(f"Phone: {requester.get('phone') or 'Not available'}")
+                    if request_index < len(listing_requests):
+                        st.divider()
         if sold_col.button("Sold", key=f"sold_{listing_id}", use_container_width=True):
             try:
                 db_client().rpc("mark_book_sold", {"p_listing_id": int(book["id"])}).execute()
@@ -1249,7 +1350,7 @@ with tab_sound:
     with s1:
         appliance = st.selectbox("Appliance", ["Ceiling or table fan", "Mixer grinder"])
         rec = st.audio_input("Record the sound")
-        up = st.file_uploader("or upload a WAV file", type=["wav"])
+        up = st.file_uploader("or upload a WAV or MP3 file", type=["wav", "mp3"])
         audio = rec or up
 
     with s2:
@@ -1261,7 +1362,7 @@ with tab_sound:
             )
         else:
             try:
-                res = analyze_audio(audio.getvalue())
+                res = analyze_audio(audio.getvalue(), getattr(audio, "name", ""))
                 label, colour, why = verdict_for(res["fault"], res["silent"])
                 c1_, c2_ = colour.split("|")
                 st.markdown(
@@ -1280,7 +1381,7 @@ with tab_sound:
                     except Exception as e:
                         st.error(f"Could not save the verdict. Run the Supabase setup SQL first. ({type(e).__name__})")
             except Exception:
-                st.error("Could not read this audio. Record again, or upload a WAV file (16-bit).")
+                st.error("Could not read this audio. Upload a valid WAV file or add the PyAV package to requirements.txt to enable MP3 decoding.")
 
     if res is not None and not res["silent"]:
         step = max(1, len(res["x"]) // 1500)
