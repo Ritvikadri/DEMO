@@ -9,6 +9,7 @@ import io
 import json
 import math
 import os
+import textwrap
 import time
 import wave
 from urllib.parse import quote, urlencode
@@ -168,8 +169,8 @@ def show_auth_gate():
             client.postgrest.auth(token)
         return user
 
-    st.markdown(
-        f'''<style>
+    splash_html = textwrap.dedent(f"""\
+        <style>
         .rl-auth-splash {{ position:fixed; inset:0; z-index:99999; display:grid; place-items:center;
           background:radial-gradient(circle at 50% 48%,#1D3932 0%,#0A1514 60%); color:#F4F7F5;
           animation:rl-splash-exit .85s ease-in-out 2.15s forwards; }}
@@ -191,9 +192,9 @@ def show_auth_gate():
         </style>
         <div class="rl-auth-splash"><div class="rl-auth-splash-inner">
           <img src="{reloop_logo_uri()}" alt="ReLoop logo"><strong>ReLoop</strong><span>Reuse · Resell · Recycle</span>
-        </div></div>''',
-        unsafe_allow_html=True,
-    )
+        </div></div>
+    """)
+    st.markdown(splash_html, unsafe_allow_html=True)
     st.markdown('<div class="rl-auth-title"><h2>Welcome to ReLoop</h2><p>Log in or create an account to continue</p></div>', unsafe_allow_html=True)
     login_tab, signup_tab = st.tabs(["Log in", "Sign up"])
 
