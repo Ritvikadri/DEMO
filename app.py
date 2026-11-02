@@ -195,14 +195,23 @@ def show_auth_gate():
           box-shadow:0 24px 70px -42px rgba(111,211,176,.42),inset 0 1px 0 rgba(255,255,255,.045); }}
         .rl-auth-title h2 {{ margin:0; color:#F4F7F5; font-size:clamp(2rem,4vw,3rem); font-weight:800; letter-spacing:-.035em; }}
         .rl-auth-title p {{ color:#A6BBB4; margin:9px 0 2px; font-size:1.08rem; }}
-        .stTabs {{ max-width:760px; margin:0 auto; }}
-        .stTabs [data-baseweb="tab-list"] {{ justify-content:center; gap:8px; padding:6px; border:1px solid rgba(111,211,176,.18);
-          border-radius:17px; background:rgba(10,21,20,.76); }}
-        .stTabs [data-baseweb="tab-border"], .stTabs [data-baseweb="tab-highlight"] {{ display:none!important; }}
-        .stTabs [data-baseweb="tab"] {{ min-height:52px; padding:12px 28px; border:1px solid transparent; border-radius:12px;
-          color:#A9BDB7!important; font-size:1.05rem; font-weight:650; }}
-        .stTabs [data-baseweb="tab"][aria-selected="true"] {{ color:#fff!important; background:rgba(255,255,255,.09)!important;
-          border:1px solid rgba(255,255,255,.76)!important; }}
+        .st-key-auth_mode_switch {{ box-sizing:border-box; max-width:520px; margin:4px auto 18px; padding:6px;
+          border:1px solid rgba(111,211,176,.2); border-radius:19px; background:rgba(10,21,20,.78);
+          box-shadow:0 16px 40px -30px rgba(111,211,176,.42); }}
+        .st-key-auth_mode_login div.stButton > button, .st-key-auth_mode_login_active div.stButton > button,
+        .st-key-auth_mode_signup div.stButton > button, .st-key-auth_mode_signup_active div.stButton > button {{
+          box-sizing:border-box; width:100%; height:52px; min-height:52px; padding:10px 18px!important;
+          border:1px solid transparent!important; border-radius:13px!important; background:transparent!important;
+          color:#A9BDB7!important; box-shadow:none!important; font-size:1.02rem; font-weight:650;
+          transform:none!important; outline:none!important; transition:background .16s ease,border-color .16s ease,color .16s ease;
+        }}
+        .st-key-auth_mode_login_active div.stButton > button, .st-key-auth_mode_signup_active div.stButton > button {{
+          color:#FFFFFF!important; background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.06))!important;
+          border:1px solid rgba(255,255,255,.88)!important; box-shadow:inset 0 1px 0 rgba(255,255,255,.1)!important;
+        }}
+        .st-key-auth_mode_login div.stButton > button:hover, .st-key-auth_mode_signup div.stButton > button:hover {{
+          color:#FFFFFF!important; background:rgba(255,255,255,.055)!important; border-color:rgba(255,255,255,.25)!important;
+        }}
         div[data-testid="stForm"] {{ box-sizing:border-box; max-width:760px; margin:12px auto 30px; padding:26px 28px;
           border:1px solid rgba(111,211,176,.20); border-radius:22px;
           background:linear-gradient(145deg,rgba(23,42,39,.88),rgba(12,24,22,.92));
@@ -214,7 +223,7 @@ def show_auth_gate():
           box-shadow:0 16px 34px -18px rgba(242,177,56,.68)!important; transition:filter .16s ease,box-shadow .16s ease,transform .16s ease; }}
         div[data-testid="stForm"] .stFormSubmitButton > button:hover {{ filter:brightness(1.08); transform:translateY(-1px);
           box-shadow:0 20px 42px -18px rgba(242,177,56,.78)!important; }}
-        @media (max-width:640px) {{ div[data-testid="stForm"] {{ padding:20px 16px; }} .stTabs [data-baseweb="tab"] {{ padding:10px 18px; }} }}
+        @media (max-width:640px) {{ div[data-testid="stForm"] {{ padding:20px 16px; }} .st-key-auth_mode_switch {{ margin-left:12px; margin-right:12px; }} }}
         @media (prefers-reduced-motion:reduce) {{ .rl-auth-splash,.rl-auth-splash * {{ animation-duration:.01ms!important; animation-delay:0ms!important; }} }}
         </style>
         <div class="rl-auth-splash"><div class="rl-auth-splash-inner">
@@ -223,9 +232,19 @@ def show_auth_gate():
     """)
     st.markdown(splash_html, unsafe_allow_html=True)
     st.markdown('<div class="rl-auth-title"><h2>Welcome to ReLoop</h2><p>Log in or create an account to continue</p></div>', unsafe_allow_html=True)
-    login_tab, signup_tab = st.tabs(["Log in", "Sign up"])
+    st.session_state.setdefault("auth_mode", "Log in")
+    with st.container(key="auth_mode_switch"):
+        auth_login_col, auth_signup_col = st.columns(2, gap="small")
+        login_key = "auth_mode_login_active" if st.session_state.auth_mode == "Log in" else "auth_mode_login"
+        signup_key = "auth_mode_signup_active" if st.session_state.auth_mode == "Sign up" else "auth_mode_signup"
+        if auth_login_col.button("Log in", key=login_key, use_container_width=True):
+            st.session_state.auth_mode = "Log in"
+            st.rerun()
+        if auth_signup_col.button("Sign up", key=signup_key, use_container_width=True):
+            st.session_state.auth_mode = "Sign up"
+            st.rerun()
 
-    with login_tab:
+    if st.session_state.auth_mode == "Log in":
         with st.form("reloop_login_form"):
             email = st.text_input("Email", key="reloop_login_email")
             password = st.text_input("Password", type="password", key="reloop_login_password")
@@ -244,7 +263,7 @@ def show_auth_gate():
             except Exception:
                 st.error("Login failed. Check your email and password, then try again.")
 
-    with signup_tab:
+    else:
         with st.form("reloop_signup_form"):
             full_name = st.text_input("Name", key="reloop_signup_name")
             email = st.text_input("Email", key="reloop_signup_email")
