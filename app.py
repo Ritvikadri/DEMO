@@ -184,12 +184,37 @@ def show_auth_gate():
         @keyframes rl-logo-turn {{ from {{ transform:rotate(-100deg) scale(.65) }} to {{ transform:rotate(0) scale(1) }} }}
         @keyframes rl-title-in {{ to {{ opacity:1 }} }}
         @keyframes rl-splash-exit {{ to {{ opacity:0; visibility:hidden; pointer-events:none }} }}
-        .rl-auth-title {{ text-align:center; margin:14px 0 8px; }}
-        .rl-auth-title h2 {{ margin:0; color:#E9F0ED; }}
-        .rl-auth-title p {{ color:#8FA8A2; margin:7px 0 20px; }}
-        .stTabs [data-baseweb="tab-list"] {{ justify-content:center; gap:18px; }}
-        .stTabs [data-baseweb="tab"][aria-selected="true"] {{ color:#fff!important; background:rgba(255,255,255,.045)!important; border:1px solid rgba(255,255,255,.78)!important; border-radius:11px; }}
-        div[data-testid="stForm"] {{ max-width:760px; margin:0 auto; }}
+        .stApp, [data-testid="stAppViewContainer"] {{
+          background:radial-gradient(ellipse at 18% 8%,rgba(111,211,176,.12),transparent 34%),
+                     radial-gradient(ellipse at 88% 22%,rgba(242,177,56,.10),transparent 30%),
+                     linear-gradient(145deg,#0A1514 0%,#101D1B 52%,#0A1514 100%);
+        }}
+        .rl-auth-title {{ max-width:760px; box-sizing:border-box; text-align:center; margin:34px auto 16px; padding:26px 28px 18px;
+          border:1px solid rgba(111,211,176,.20); border-radius:24px;
+          background:radial-gradient(ellipse at 50% 0%,rgba(111,211,176,.11),transparent 68%),linear-gradient(145deg,rgba(23,42,39,.92),rgba(12,24,22,.92));
+          box-shadow:0 24px 70px -42px rgba(111,211,176,.42),inset 0 1px 0 rgba(255,255,255,.045); }}
+        .rl-auth-title h2 {{ margin:0; color:#F4F7F5; font-size:clamp(2rem,4vw,3rem); font-weight:800; letter-spacing:-.035em; }}
+        .rl-auth-title p {{ color:#A6BBB4; margin:9px 0 2px; font-size:1.08rem; }}
+        .stTabs {{ max-width:760px; margin:0 auto; }}
+        .stTabs [data-baseweb="tab-list"] {{ justify-content:center; gap:8px; padding:6px; border:1px solid rgba(111,211,176,.18);
+          border-radius:17px; background:rgba(10,21,20,.76); }}
+        .stTabs [data-baseweb="tab-border"], .stTabs [data-baseweb="tab-highlight"] {{ display:none!important; }}
+        .stTabs [data-baseweb="tab"] {{ min-height:52px; padding:12px 28px; border:1px solid transparent; border-radius:12px;
+          color:#A9BDB7!important; font-size:1.05rem; font-weight:650; }}
+        .stTabs [data-baseweb="tab"][aria-selected="true"] {{ color:#fff!important; background:rgba(255,255,255,.09)!important;
+          border:1px solid rgba(255,255,255,.76)!important; }}
+        div[data-testid="stForm"] {{ box-sizing:border-box; max-width:760px; margin:12px auto 30px; padding:26px 28px;
+          border:1px solid rgba(111,211,176,.20); border-radius:22px;
+          background:linear-gradient(145deg,rgba(23,42,39,.88),rgba(12,24,22,.92));
+          box-shadow:0 24px 70px -48px rgba(111,211,176,.32),inset 0 1px 0 rgba(255,255,255,.04); }}
+        div[data-testid="stForm"] label {{ color:#E7EFEC!important; font-weight:600; }}
+        div[data-testid="stForm"] .stFormSubmitButton > button {{ width:100%; min-height:58px; padding:16px 26px!important;
+          border:1px solid rgba(255,255,255,.12)!important; border-radius:15px!important; color:#12332F!important;
+          background:linear-gradient(135deg,#FFD45C,#F2B138)!important; font-size:1.12rem; font-weight:800;
+          box-shadow:0 16px 34px -18px rgba(242,177,56,.68)!important; transition:filter .16s ease,box-shadow .16s ease,transform .16s ease; }}
+        div[data-testid="stForm"] .stFormSubmitButton > button:hover {{ filter:brightness(1.08); transform:translateY(-1px);
+          box-shadow:0 20px 42px -18px rgba(242,177,56,.78)!important; }}
+        @media (max-width:640px) {{ div[data-testid="stForm"] {{ padding:20px 16px; }} .stTabs [data-baseweb="tab"] {{ padding:10px 18px; }} }}
         @media (prefers-reduced-motion:reduce) {{ .rl-auth-splash,.rl-auth-splash * {{ animation-duration:.01ms!important; animation-delay:0ms!important; }} }}
         </style>
         <div class="rl-auth-splash"><div class="rl-auth-splash-inner">
@@ -515,14 +540,25 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .stButton > button:focus-visible {{ outline: 3px solid {MINT}; outline-offset: 2px; }}
 .stButton > button:disabled {{ background: {SURFACE2}; color: {MUTE}; box-shadow: none; }}
 .st-key-list_book_button button {{
-  --list-prox: 0;
+  --list-glow-alpha: .20; --list-glow-blur: 12px; --list-glow-spread: 0px;
+  --list-shadow-alpha: .14; --list-shadow-blur: 24px;
+  position:relative;
   background: linear-gradient(135deg, #FFD45C, #F2B138);
   font-weight: 800; border: 0;
-  box-shadow: 0 0 calc(10px + var(--list-prox) * 30px) rgba(242,177,56,calc(.28 + var(--list-prox) * .5)),
-              0 8px calc(22px + var(--list-prox) * 38px) rgba(242,177,56,calc(.18 + var(--list-prox) * .35));
+  box-shadow: 0 0 var(--list-glow-blur) var(--list-glow-spread) rgba(242,177,56,var(--list-glow-alpha)),
+              0 8px var(--list-shadow-blur) rgba(242,177,56,var(--list-shadow-alpha));
   transition: box-shadow .15s ease, transform .15s ease, filter .15s ease;
 }}
 .st-key-list_book_button button:hover {{ filter: brightness(1.12); transform: translateY(-2px); }}
+.st-key-refresh_my_book_requests button,
+.st-key-refresh_my_book_requests button:hover,
+.st-key-refresh_my_book_requests button:active,
+.st-key-refresh_my_book_requests button:focus-visible {{
+  min-height:50px; color:#12332F !important; background:linear-gradient(135deg,#FFD45C,#F2B138) !important;
+  border:1px solid rgba(255,255,255,.14) !important; border-radius:13px !important;
+  box-shadow:0 10px 24px -12px rgba(242,177,56,.55) !important;
+  filter:none !important; opacity:1 !important; transform:none !important; outline:none !important;
+}}
 
 
 [data-testid="stMetric"] {{ background: linear-gradient(180deg, {SURFACE2}, {SURFACE}); border: 1px solid {LINE}; border-radius: 18px; padding: 16px 20px; }}
@@ -995,7 +1031,11 @@ components.html(
         var by = Math.max(b.top - e.clientY, 0, e.clientY - b.bottom);
         var bt = Math.max(0, Math.min(1, 1 - Math.hypot(bx, by) / 260));
         bt = bt * bt * (3 - 2 * bt);
-        listButton.style.setProperty("--list-prox", bt.toFixed(3));
+        listButton.style.setProperty("--list-glow-alpha", (0.20 + bt * 0.54).toFixed(3));
+        listButton.style.setProperty("--list-glow-blur", (12 + bt * 54).toFixed(0) + "px");
+        listButton.style.setProperty("--list-glow-spread", (bt * 4).toFixed(0) + "px");
+        listButton.style.setProperty("--list-shadow-alpha", (0.14 + bt * 0.34).toFixed(3));
+        listButton.style.setProperty("--list-shadow-blur", (24 + bt * 76).toFixed(0) + "px");
       }
     };
     p.document.addEventListener("mousemove", p.__rlProxHandler);
