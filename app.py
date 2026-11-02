@@ -173,7 +173,7 @@ def show_auth_gate():
 
     splash_html = textwrap.dedent(f"""\
         <style>
-        :root {{ color-scheme:dark!important; --primary-color:#F2B138; --background-color:#0A1514; --secondary-background-color:#111F1D; --text-color:#E9F0ED; }}
+        :root {{ color-scheme:dark!important; --primary-color:#F2B138!important; --background-color:#0A1514!important; --secondary-background-color:#111F1D!important; --text-color:#E9F0ED!important; }}
         html, body, .stApp, [data-testid="stAppViewContainer"] {{ background-color:#0A1514!important; color:#E9F0ED!important; }}
         .rl-auth-splash {{ position:fixed; inset:0; z-index:99999; display:grid; place-items:center;
           background:radial-gradient(circle at 50% 48%,#1D3932 0%,#0A1514 60%); color:#F4F7F5;
@@ -192,6 +192,9 @@ def show_auth_gate():
                      linear-gradient(145deg,#0A1514 0%,#101D1B 52%,#0A1514 100%)!important;
         }}
         [data-testid="stMain"], .block-container {{ color:#E9F0ED!important; }}
+        div[data-baseweb="select"] > div {{ background:#172A27!important; color:#E9F0ED!important; border-color:#25413D!important; }}
+        div[data-baseweb="select"] input, div[data-baseweb="select"] [role="combobox"] {{ color:#E9F0ED!important; background:transparent!important; }}
+        [data-baseweb="popover"], [data-baseweb="menu"], ul[role="listbox"], li[role="option"] {{ background:#172A27!important; color:#E9F0ED!important; }}
         .rl-auth-title {{ max-width:760px; box-sizing:border-box; text-align:center; margin:34px auto 16px; padding:26px 28px 18px;
           border:1px solid rgba(111,211,176,.20); border-radius:24px;
           background:radial-gradient(ellipse at 50% 0%,rgba(111,211,176,.11),transparent 68%),linear-gradient(145deg,rgba(23,42,39,.92),rgba(12,24,22,.92))!important;
@@ -334,7 +337,7 @@ CSS = f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;700&display=swap');
 
- :root {{ color-scheme: dark !important; --primary-color:{MARIGOLD}; --background-color:{BG}; --secondary-background-color:{SURFACE}; --text-color:{TEXT}; }}
+ :root {{ color-scheme: dark !important; --primary-color:{MARIGOLD} !important; --background-color:{BG} !important; --secondary-background-color:{SURFACE} !important; --text-color:{TEXT} !important; }}
 html, body, [class*="css"], .stApp {{ font-family: 'DM Sans', sans-serif !important; color: {TEXT} !important; color-scheme: dark !important; }}
 .stApp {{ --primary-color:{MARIGOLD} !important; --background-color:{BG} !important; --secondary-background-color:{SURFACE} !important; --text-color:{TEXT} !important; }}
 .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], section.main {{
@@ -345,6 +348,7 @@ html, body, [class*="css"], .stApp {{ font-family: 'DM Sans', sans-serif !import
 }}
 [data-testid="stSidebar"], [data-testid="stHeader"] {{ background-color:{BG} !important; color:{TEXT} !important; }}
 [data-testid="stMainBlockContainer"], .block-container {{ color:{TEXT} !important; }}
+[data-testid="stWidgetLabel"], [data-testid="stWidgetLabel"] *, label, label * {{ color:{TEXT} !important; }}
 h1, h2, h3, .rl-display {{ font-family: 'Bricolage Grotesque', sans-serif !important; letter-spacing: -0.02em; color: {TEXT}; }}
 h3 {{ font-size: 1.7rem !important; }}
 header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height: 0; }}
@@ -593,21 +597,33 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 [data-testid="stMetricValue"] {{ font-family: 'Bricolage Grotesque'; font-weight: 800; color: {MARIGOLD}; }}
 [data-testid="stMetricLabel"] p {{ color: {MUTE}; }}
 
-[data-baseweb="select"] > div, [data-baseweb="input"] > div, .stTextInput input, .stNumberInput input, .stTextArea textarea {{
+[data-testid="stSelectbox"] [data-baseweb="select"] > div,
+[data-testid="stMultiSelect"] [data-baseweb="select"] > div,
+[data-baseweb="select"] > div, [data-baseweb="input"] > div,
+.stTextInput input, .stNumberInput input, .stTextArea textarea {{
   background:{SURFACE} !important; color:{TEXT} !important; border-color:{LINE} !important; border-radius:12px !important; color-scheme:dark !important;
 }}
-[data-baseweb="select"] [data-baseweb="select"] {{ background:{SURFACE} !important; color:{TEXT} !important; }}
-[data-baseweb="popover"], [data-baseweb="menu"], ul[role="listbox"] {{ background:{SURFACE2} !important; color:{TEXT} !important; }}
-[role="option"] {{ background:{SURFACE2} !important; color:{TEXT} !important; }}
+[data-testid="stSelectbox"] [data-baseweb="select"] input,
+[data-testid="stSelectbox"] [data-baseweb="select"] [role="combobox"],
+[data-testid="stMultiSelect"] [data-baseweb="select"] input {{ background:transparent !important; color:{TEXT} !important; }}
+[data-testid="stSelectbox"] [data-baseweb="select"] {{ background:{SURFACE} !important; color:{TEXT} !important; }}
+[data-testid="stSelectbox"] [data-baseweb="select"] * {{ background-color:transparent !important; color:{TEXT} !important; }}
+[data-testid="stSelectbox"] [data-baseweb="select"] > div {{ background:{SURFACE} !important; }}
+[data-testid="stSelectbox"] [data-baseweb="select"]:focus-within,
+[data-testid="stMultiSelect"] [data-baseweb="select"]:focus-within,
+.stTextInput input:focus, .stNumberInput input:focus, .stTextArea textarea:focus {{ border-color:{MINT} !important; box-shadow:0 0 0 1px rgba(111,211,176,.32) !important; }}
+[data-baseweb="popover"], [data-baseweb="menu"], ul[role="listbox"],
+li[role="option"], [role="option"] {{ background:{SURFACE2} !important; color:{TEXT} !important; }}
 [data-testid="stFileUploaderDropzone"] {{ background:{SURFACE} !important; color:{TEXT} !important; border:1.5px dashed #3B6A63; border-radius:16px; }}
 [data-testid="stExpander"] {{ background:{SURFACE} !important; color:{TEXT} !important; border:1px solid {LINE}; border-radius:16px; }}
 [data-testid="stForm"] {{ background:{SURFACE} !important; color:{TEXT} !important; border:1px solid {LINE}; border-radius:16px; }}
 [data-testid="stAlert"] {{ color:{TEXT} !important; }}
 [data-testid="stDataFrame"], [data-testid="stImage"] img {{ border-radius: 16px; }}
 [data-testid="stCaptionContainer"] {{ color: {MUTE}; }}
-div[data-testid="stPopover"] > button {{ color:#fff !important; border-color:rgba(255,255,255,.24) !important; }}
-div[data-testid="stPopover"] > button:hover {{ color:#fff !important; border-color:rgba(255,255,255,.62) !important; }}
-button[data-testid="stPopoverButton"] {{ color:#fff !important; }}
+div[data-testid="stPopover"] > button {{ color:{TEXT} !important; background:{SURFACE2} !important; border:1px solid {LINE} !important; }}
+div[data-testid="stPopover"] > button:hover {{ color:{TEXT} !important; background:{SURFACE2} !important; border-color:rgba(255,255,255,.42) !important; }}
+button[data-testid="stPopoverButton"] {{ color:{TEXT} !important; background:{SURFACE2} !important; border:1px solid {LINE} !important; }}
+button[data-testid="stPopoverButton"]:hover {{ color:{TEXT} !important; background:{SURFACE2} !important; border-color:rgba(255,255,255,.42) !important; }}
 
 @media (max-width: 900px) {{
   .rl-hero {{ grid-template-columns: 1fr; padding: 30px 24px; }}
