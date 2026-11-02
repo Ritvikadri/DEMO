@@ -474,31 +474,36 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
   .rl-workspace-bar {{ flex-direction: column; align-items: flex-start; gap: 4px; }}
 }}
 
-/* ---------- centered, app-controlled section navigation ---------- */
+/* ---------- compact, centered section navigation in one steady frame ---------- */
+.st-key-section_nav {{
+  box-sizing:border-box; max-width:1160px; margin:0 auto 22px; padding:5px 8px;
+  border:1px solid rgba(111,211,176,.22); border-radius:20px;
+  background:linear-gradient(145deg,rgba(19,37,34,.42),rgba(12,24,22,.58));
+}}
 .st-key-nav_scrap_vision div.stButton > button, .st-key-nav_book_loop div.stButton > button,
 .st-key-nav_sound_check div.stButton > button, .st-key-nav_impact div.stButton > button {{
-  min-height:56px; padding:12px 18px; border-radius:15px !important;
-  color:#A9BDB7 !important; background:linear-gradient(145deg,rgba(19,37,34,.96),rgba(12,24,22,.96)) !important;
-  border:1px solid rgba(111,211,176,.20) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.045) !important;
-  font-size:1rem; font-weight:650; white-space:nowrap;
-  transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease;
+  box-sizing:border-box; width:100%; height:44px; min-height:44px; padding:7px 12px !important;
+  border:1px solid transparent !important; border-radius:14px !important;
+  color:#A9BDB7 !important; background:transparent !important; box-shadow:none !important;
+  font-size:.96rem; font-weight:600; line-height:1.2; white-space:nowrap;
+  transform:none !important; outline:none !important;
+  transition:background .16s ease,border-color .16s ease,color .16s ease;
 }}
 .st-key-nav_scrap_vision div.stButton > button:hover, .st-key-nav_book_loop div.stButton > button:hover,
 .st-key-nav_sound_check div.stButton > button:hover, .st-key-nav_impact div.stButton > button:hover {{
-  color:#FFFFFF !important; background:rgba(255,255,255,.075) !important;
-  border-color:rgba(255,255,255,.55) !important; transform:translateY(-2px);
-  box-shadow:0 10px 22px -16px rgba(255,255,255,.4) !important;
+  color:#FFFFFF !important; background:rgba(255,255,255,.055) !important;
+  border-color:rgba(255,255,255,.28) !important; transform:none !important; box-shadow:none !important;
 }}
 .st-key-nav_scrap_vision_active div.stButton > button, .st-key-nav_book_loop_active div.stButton > button,
 .st-key-nav_sound_check_active div.stButton > button, .st-key-nav_impact_active div.stButton > button {{
-  color:#FFFFFF !important; background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.055)) !important;
-  border:1px solid rgba(255,255,255,.94) !important; outline:1px solid rgba(255,255,255,.17); outline-offset:2px;
-  box-shadow:0 8px 24px -17px rgba(255,255,255,.6),inset 0 1px 0 rgba(255,255,255,.16) !important;
-  font-weight:750; transform:translateY(-1px);
+  color:#FFFFFF !important; background:rgba(255,255,255,.085) !important;
+  border:1px solid rgba(255,255,255,.88) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.10) !important;
+  font-weight:650; transform:none !important; outline:none !important;
 }}
 @media (max-width: 640px) {{
+  .st-key-section_nav {{ padding:4px; border-radius:16px; }}
   .st-key-nav_scrap_vision div.stButton > button, .st-key-nav_book_loop div.stButton > button,
-  .st-key-nav_sound_check div.stButton > button, .st-key-nav_impact div.stButton > button {{ min-height:48px; padding:9px 6px; font-size:.78rem; white-space:normal; }}
+  .st-key-nav_sound_check div.stButton > button, .st-key-nav_impact div.stButton > button {{ height:42px; min-height:42px; padding:6px 3px !important; font-size:.75rem; white-space:normal; }}
 }}
 
 .stButton > button, .stDownloadButton > button, .stFormSubmitButton > button {{
@@ -551,19 +556,18 @@ st.markdown(
 )
 st.session_state.setdefault("active_section", "Scrap Vision")
 active_section = st.session_state.active_section
-nav_spacer_left, nav_scrap, nav_books, nav_sound, nav_impact, nav_spacer_right = st.columns(
-    [1, 1.35, 1.35, 1.45, 0.9, 1], gap="small"
-)
-for nav_col, label, slug in [
-    (nav_scrap, "Scrap Vision", "scrap_vision"),
-    (nav_books, "Book Loop", "book_loop"),
-    (nav_sound, "Sound Check", "sound_check"),
-    (nav_impact, "Impact", "impact"),
-]:
-    widget_key = f"nav_{slug}_active" if active_section == label else f"nav_{slug}"
-    if nav_col.button(label, key=widget_key, use_container_width=True):
-        st.session_state.active_section = label
-        st.rerun()
+with st.container(key="section_nav"):
+    nav_scrap, nav_books, nav_sound, nav_impact = st.columns(4, gap="small")
+    for nav_col, label, slug in [
+        (nav_scrap, "Scrap Vision", "scrap_vision"),
+        (nav_books, "Book Loop", "book_loop"),
+        (nav_sound, "Sound Check", "sound_check"),
+        (nav_impact, "Impact", "impact"),
+    ]:
+        widget_key = f"nav_{slug}_active" if active_section == label else f"nav_{slug}"
+        if nav_col.button(label, key=widget_key, use_container_width=True):
+            st.session_state.active_section = label
+            st.rerun()
 
 # ----------------------------------------------------------------------------
 # Data (sample data for the prototype; replace with Supabase tables later)
