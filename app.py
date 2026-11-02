@@ -1178,14 +1178,17 @@ if active_section == "Book Loop":
         listings, requested_ids, contact_by_owner = [], set(), {}
         st.error(f"Could not load book listings or contacts. Check Supabase SQL and RLS policies. ({type(e).__name__})")
 
+    # The marketplace grid is for books you can browse and request from others.
+    # Your own active and sold listings are rendered in the separate section below.
     shown = [
         row for row in listings
+        if str(row.get("owner_id")) != str(current_user["id"])
         if (exam == "All" or row["exam"] == exam)
         and (subject == "All" or row["subject"] == subject)
         and q.lower() in row["title"].lower()
     ]
     if not shown:
-        st.info("No active listings match. List a book to add it to ReLoop.")
+        st.info("No books from other sellers match these filters. Your books for sale are shown separately below.")
 
     for row_start in range(0, len(shown), 3):
         cols = st.columns(3, gap="medium")
