@@ -86,7 +86,13 @@ def render_brand(size=72, show_account=False):
         # Keep the account's saved display name available to listings and requests.
         st.session_state.auth_user["name"] = default_name
 
-
+         with account_col:
+            account_logo_col, account_menu_col = st.columns([0.32, 1.5], vertical_alignment="center")
+            account_logo_col.markdown(
+                f'<div style="display:flex;justify-content:center"><img src="data:image/png;base64,{logo_data}" '
+                'alt="ReLoop" style="width:25px;height:25px;object-fit:contain;filter:grayscale(1) brightness(0) invert(1)"></div>',
+                unsafe_allow_html=True,
+            )
         
             with account_menu_col:
                 with st.popover("Account", use_container_width=True):
