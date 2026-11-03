@@ -487,6 +487,16 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-imp-progress i {{ display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, {MINT}, {MARIGOLD}); }}
 .rl-imp-next {{ color: {TEXT}; font-size: .92rem; margin-top: 10px; }}
 .rl-imp-tip {{ color: {MUTE}; font-size: .85rem; margin-top: 6px; }}
+.rl-imp-contrib {{ margin-top:14px; padding:10px 12px; border-radius:12px; background:rgba(111,211,176,.07);
+  border:1px solid rgba(111,211,176,.16); color:{MUTE}; font-size:.84rem; line-height:1.45; }}
+.rl-imp-contrib b {{ color:{TEXT}; }}
+.rl-imp-benchmarks {{ display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }}
+.rl-imp-benchmark {{ display:flex; align-items:center; gap:5px; padding:5px 8px; border-radius:10px;
+  background:rgba(255,255,255,.035); border:1px solid {LINE}; color:{MUTE}; font-size:.72rem; }}
+.rl-imp-benchmark b {{ color:{TEXT}; font-weight:650; }}
+.rl-imp-benchmark small {{ color:{MUTE}; font-size:.68rem; }}
+.rl-imp-benchmark.current {{ border-color:rgba(242,177,56,.52); background:rgba(242,177,56,.10); }}
+.rl-imp-benchmark.current b {{ color:{MARIGOLD}; }}
 
 .rl-imp-panel {{ box-sizing: border-box; border-radius: 22px; padding: 22px 24px; border: 1px solid {LINE};
   background: linear-gradient(180deg, {SURFACE2} 0%, {SURFACE} 100%);
@@ -1094,8 +1104,8 @@ def decode_audio(raw: bytes, filename=""):
 def analyze_audio(raw: bytes, filename=""):
     """
     Prototype heuristic standing in for a fine-tuned YAMNet classifier.
-    A healthy fan or mixer gives a steady, tonal hum. Faults show up as unstable loudness,
-    noisy (flat) spectrum and extra high-frequency rattle.
+    It uses general audio signals (loudness stability, noise, and high-frequency rattle),
+    rather than a separate trained classifier for each appliance type.
     """
     sr, x = decode_audio(raw, filename)
     x = x - np.mean(x)
@@ -1677,11 +1687,23 @@ if active_section == "Book Loop":
 # ----------------------------------------------------------------------------
 if active_section == "Sound Check":
     st.subheader("Does it still run well?")
-    st.write("Hold your phone near the fan or mixer while it runs, and record for 5 to 10 seconds.")
+    st.write("Record a steady 5 to 10 second sound sample while the appliance is running.")
     res = None
     s1, s2 = st.columns([1, 1.2], gap="large")
     with s1:
-        appliance = st.selectbox("Appliance", ["Ceiling or table fan", "Mixer grinder"])
+        appliance_choice = st.selectbox(
+            "Appliance",
+            [
+                "Ceiling or table fan", "Mixer grinder", "Washing machine", "Refrigerator",
+                "Water pump", "Vacuum cleaner", "Air cooler", "Electric motor", "Other",
+            ],
+        )
+        if appliance_choice == "Other":
+            other_appliance = st.text_input("Appliance name", placeholder="e.g. exhaust fan")
+            appliance = other_appliance.strip() or "Other appliance"
+        else:
+            appliance = appliance_choice
+        st.caption("Record the appliance running steadily in a quiet place. The prototype uses one general sound check for every appliance type.")
         rec = st.audio_input("Record the sound")
         up = st.file_uploader("or upload a WAV or MP3 file", type=["wav", "mp3"])
         audio = rec or up
@@ -1847,6 +1869,11 @@ if active_section == "Impact":
     cur, nxt, level_pct = imp_level(points_total)
     next_text = "Top level reached. Thank you for keeping things in use." if nxt is None \
         else f"{nxt[0] - points_total:,} points to {nxt[1]}"
+    benchmark_html = "".join(
+        f'<span class="rl-imp-benchmark{" current" if level_name == cur[1] else ""}">'
+        f'{emoji}<b>{html.escape(level_name)}</b><small>{threshold:,} pts</small></span>'
+        for threshold, level_name, emoji in LEVELS
+    )
     hero_html = (
         '<div class="rl-imp-hero">'
         '<div class="rl-imp-eyebrow">Value unlocked</div>'
@@ -1866,7 +1893,9 @@ if active_section == "Impact":
         f'<div><div class="rl-imp-pts">{points_total:,}</div><div class="rl-imp-lvl">{cur[1]} level</div></div></div>'
         f'<div class="rl-imp-progress"><i style="width:{level_pct:.0f}%"></i></div>'
         f'<div class="rl-imp-next">{next_text}</div>'
-        '<div class="rl-imp-tip">Earn 100 points every time a listed book is sold.</div>'
+        f'<div class="rl-imp-contrib"><b>Your contribution:</b> {len(sale_rows)} books sold · {points_total:,} points earned.</div>'
+        f'<div class="rl-imp-benchmarks">{benchmark_html}</div>'
+        '<div class="rl-imp-tip">Earn 100 points when a listed book is marked Sold. Scrap valuations, book requests, and sound checks are tracked in your impact totals, but do not currently add points.</div>'
         '</div>'
     )
     st.markdown(f'<div class="rl-imp-grid g-head">{hero_html}{level_html}</div>', unsafe_allow_html=True)
@@ -1889,7 +1918,7 @@ if active_section == "Impact":
         text = f"{verdict_counts[v]} · {share:.0f}%" if verdict_total else "0"
         verdict_body += imp_bar(VERDICT_LABELS[v][0], text, share, VERDICT_LABELS[v][1])
     if not verdict_total:
-        verdict_body += '<div class="rl-imp-empty">Record a fan or mixer on the Sound Check tab and save the verdict to see it here.</div>'
+        verdict_body += '<div class="rl-imp-empty">Record any listed appliance on the Sound Check tab and save its verdict to see it here.</div>'
 
     st.markdown(
         '<div class="rl-imp-grid g-three">'
