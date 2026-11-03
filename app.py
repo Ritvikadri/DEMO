@@ -1720,7 +1720,7 @@ if active_section == "Sound Check":
         step = max(1, len(res["x"]) // 1500)
         st.caption("Waveform")
         st.line_chart(pd.DataFrame({"amplitude": res["x"][::step]}), height=160, color=MARIGOLD)
-    st.caption("Prototype scoring uses simple sound features. The full version swaps in a YAMNet model fine-tuned on working, noisy and dead appliance clips.")
+    
 
 # ----------------------------------------------------------------------------
 # Impact
