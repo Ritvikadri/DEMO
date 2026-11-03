@@ -707,7 +707,7 @@ DEALERS_BY_AREA = {
         {
             "name": "SR SCRAP DEALERS",
             "lat": 12.9140, "lon": 77.5600,
-            "share": 0.96,
+            "share": 0.46,
             "speciality": "All household scrap",
             "phone": "+919916410931", 
             "maps_url": "https://www.google.com/maps/place/SR+SCRAP+DEALERS/@12.981355,77.3448391,11z/data=!4m10!1m2!2m1!1sscrap+shop+in+whitefield!3m6!1s0x3bae0d62e83a3133:0x485d89d59a08d7e9!8m2!3d12.9711442!4d77.7535249!15sChhzY3JhcCBzaG9wIGluIHdoaXRlZmllbGRaGiIYc2NyYXAgc2hvcCBpbiB3aGl0ZWZpZWxkkgESc2NyYXBfbWV0YWxfZGVhbGVymgFEQ2k5RFFVbFJRVU52WkVOb2RIbGpSamx2VDI1d1JWbFZiekZNVjJSVFRVZDRSMVpGYUdGVFJXaFNWMnBvUzFwV1JSQULgAQD6AQQIABBA!16s%2Fg%2F11j384l71g?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste Ramesh Traders' Google Maps share link here.
@@ -715,7 +715,7 @@ DEALERS_BY_AREA = {
         {
             "name": "MSS SCRAP DEALERS",
             "lat": 12.9140, "lon": 77.5600,
-            "share": 0.60,
+            "share": 0.96,
             "speciality": "Plastic, Metal, All household scrap",
             "phone": "+917010623151", 
             "maps_url": "https://www.google.com/maps/place/MSS+E-WASTE+AND+ALL+KIND+OF+SCRAP+TRADERS/@12.981355,77.3448391,11z/data=!4m10!1m2!2m1!1sscrap+shop+in+whitefield!3m6!1s0x3bae138b149656a3:0x910ccb5c60acc025!8m2!3d12.9764637!4d77.7561391!15sChhzY3JhcCBzaG9wIGluIHdoaXRlZmllbGRaGiIYc2NyYXAgc2hvcCBpbiB3aGl0ZWZpZWxkkgEbcmVjeWNsaW5nX2Ryb3Bfb2ZmX2xvY2F0aW9u4AEA!16s%2Fg%2F11n570dmzg?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3Dhttps://www.google.com/maps/place/MSS+E-WASTE+AND+ALL+KIND+OF+SCRAP+TRADERS/@12.981355,77.3448391,11z/data=!4m10!1m2!2m1!1sscrap+shop+in+whitefield!3m6!1s0x3bae138b149656a3:0x910ccb5c60acc025!8m2!3d12.9764637!4d77.7561391!15sChhzY3JhcCBzaG9wIGluIHdoaXRlZmllbGRaGiIYc2NyYXAgc2hvcCBpbiB3aGl0ZWZpZWxkkgEbcmVjeWNsaW5nX2Ryb3Bfb2ZmX2xvY2F0aW9u4AEA!16s%2Fg%2F11n570dmzg?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste Ramesh Traders' Google Maps share link here.
