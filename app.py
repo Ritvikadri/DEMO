@@ -1022,19 +1022,6 @@ def detect_raw(img_bytes, model, key):
     return df, dict(model=model, resize=t_resize, api=t_api)
 
 
-def detect_raw_with_auto_reverify(img_bytes, model, key):
-    """Retry one photo up to two times when Gemini omits its required items field."""
-    for attempt in range(3):
-        try:
-            return detect_raw(img_bytes, model, key)
-        except KeyError as exc:
-            # This is the specific incomplete Gemini response shown in the app.
-            # A short pause gives the next request a chance to return valid JSON.
-            if exc.args != ("items",) or attempt == 2:
-                raise
-            time.sleep(0.4 * (attempt + 1))
-
-
 def analyze_photos(photos, picks, force=False):
     """Analyses every photo at the same time. Returns (results, errors). Repeat photos come from a cache."""
     key, model = get_api_key(), get_model()
@@ -1050,7 +1037,7 @@ def analyze_photos(photos, picks, force=False):
     errors = []
     if todo:
         with ThreadPoolExecutor(max_workers=min(4, len(todo))) as ex:
-            futs = [(i, h, ex.submit(detect_raw_with_auto_reverify, data, model, key)) for i, h, data in todo]
+            futs = [(i, h, ex.submit(detect_raw, data, model, key)) for i, h, data in todo]
             for i, h, f in futs:
                 try:
                     results[i] = cache[h] = f.result()
