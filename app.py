@@ -457,7 +457,7 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 
 /* ---------- impact dashboard ---------- */
 .rl-imp-grid {{ display: grid; gap: 24px; margin: 0 0 26px 0; align-items: stretch; }}
-.rl-imp-grid.g-head {{ grid-template-columns: 2fr 1fr; align-items: start; }}
+.rl-imp-grid.g-head {{ grid-template-columns: 2fr 1fr; align-items: stretch; }}
 .rl-imp-grid.g-three {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
 .rl-imp-grid.g-detail {{ grid-template-columns: 1fr 1.4fr; }}
 .rl-imp-grid > div {{ box-sizing: border-box; min-width: 0; }}
@@ -490,11 +490,11 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-imp-contrib {{ margin-top:10px; padding:8px 10px; border-radius:11px; background:rgba(111,211,176,.07);
   border:1px solid rgba(111,211,176,.16); color:{MUTE}; font-size:.8rem; line-height:1.35; }}
 .rl-imp-contrib b {{ color:{TEXT}; }}
-.rl-imp-benchmarks {{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; margin-top:10px; }}
-.rl-imp-benchmark {{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-width:0; padding:6px 3px; border-radius:9px;
-  background:rgba(255,255,255,.035); border:1px solid {LINE}; color:{MUTE}; font-size:.66rem; text-align:center; }}
+.rl-imp-benchmarks {{ display:flex; align-items:center; flex-wrap:wrap; gap:5px; margin-top:10px; }}
+.rl-imp-benchmark {{ display:inline-flex; align-items:center; gap:3px; min-width:0; padding:3px 5px; border-radius:7px;
+  background:transparent; border:1px solid transparent; color:{MUTE}; font-size:.64rem; white-space:nowrap; }}
 .rl-imp-benchmark b {{ color:{TEXT}; font-weight:650; }}
-.rl-imp-benchmark small {{ color:{MUTE}; font-size:.62rem; }}
+.rl-imp-benchmark small {{ color:{MUTE}; font-size:.61rem; }}
 .rl-imp-benchmark.current {{ border-color:rgba(242,177,56,.52); background:rgba(242,177,56,.10); }}
 .rl-imp-benchmark.current b {{ color:{MARIGOLD}; }}
 
@@ -530,8 +530,8 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-imp-amt {{ font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 1.05rem; white-space: nowrap; }}
 @media (max-width: 900px) {{
   .rl-imp-grid.g-head, .rl-imp-grid.g-three, .rl-imp-grid.g-detail {{ grid-template-columns: 1fr; gap: 18px; }}
-  .rl-imp-benchmarks {{ grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }}
-  .rl-imp-benchmark {{ font-size: .62rem; padding: 6px 2px; }}
+  .rl-imp-benchmarks {{ gap: 3px; }}
+  .rl-imp-benchmark {{ font-size: .62rem; padding: 3px 4px; }}
   .rl-imp-benchmark small {{ font-size: .58rem; }}
   .rl-imp-big {{ font-size: 2.8rem; }}
   .rl-imp-hero, .rl-imp-level {{ min-height: 0; }}
@@ -1896,9 +1896,9 @@ if active_section == "Impact":
         f'<div><div class="rl-imp-pts">{points_total:,}</div><div class="rl-imp-lvl">{cur[1]} level</div></div></div>'
         f'<div class="rl-imp-progress"><i style="width:{level_pct:.0f}%"></i></div>'
         f'<div class="rl-imp-next">{next_text}</div>'
-        f'<div class="rl-imp-contrib"><b>Your contribution:</b> {len(sale_rows)} books sold · {points_total:,} points earned.</div>'
+        f'<div class="rl-imp-contrib"><b>Your progress:</b> {len(sale_rows)} books sold · {points_total:,} points earned</div>'
         f'<div class="rl-imp-benchmarks">{benchmark_html}</div>'
-        '<div class="rl-imp-tip">Points: +100 for each book you mark Sold. Other activities count toward your impact totals, not points.</div>'
+        '<div class="rl-imp-tip">Marking a book Sold earns 100 points.</div>'
         '</div>'
     )
     st.markdown(f'<div class="rl-imp-grid g-head">{hero_html}{level_html}</div>', unsafe_allow_html=True)
