@@ -632,7 +632,7 @@ st.markdown(CSS, unsafe_allow_html=True)
 # ----------------------------------------------------------------------------
 st.markdown(
     '<div class="rl-workspace-bar"><span class="rl-eyebrow">Your ReLoop workspace</span>'
-    '<span class="rl-hint"></span></div>',
+    '<span class="rl-hint">Choose a section to get started</span></div>',
     unsafe_allow_html=True,
 )
 st.session_state.setdefault("active_section", "Scrap Vision")
@@ -659,6 +659,8 @@ RATES = {  # illustrative Rs per kg, localize city by city
     "Glass": 2, "E-waste (mixed)": 40,
 }
 
+# OWNER-ONLY AREA DIRECTORY — add a neighborhood here before assigning dealers to it.
+# Format: "Neighborhood name": (latitude, longitude). Use the neighborhood's center.
 AREAS = {
     "Kumaraswamy Layout": (12.9082, 77.5646),
     "Banashankari": (12.9255, 77.5468),
@@ -666,13 +668,54 @@ AREAS = {
     "Jayanagar": (12.9308, 77.5838),
 }
 
-DEMO_DEALER_PHONE = "+917625016830"  # placeholder: every kabadiwala uses this number for now
-
-DEALERS = [  # name, lat, lon, share of fair rate offered, speciality, WhatsApp phone
-    ("Ramesh Traders", 12.9140, 77.5600, 0.88, "Paper, plastic", DEMO_DEALER_PHONE),
-    ("Shree Metals", 12.9230, 77.5530, 0.95, "Metals, e-waste", DEMO_DEALER_PHONE),
-    ("Lakshmi Scrap Centre", 12.9010, 77.5900, 0.82, "All household scrap", DEMO_DEALER_PHONE),
-    ("Basavanna Recyclers", 12.9300, 77.5800, 0.91, "Paper, cardboard, glass", DEMO_DEALER_PHONE),
+# OWNER-ONLY KABADIWALA DIRECTORY — edit this section in app.py.
+# This is deliberately a Python configuration (there is no public edit form),
+# so only someone who can edit and redeploy the app's source code can change it.
+#
+# To add a kabadiwala, copy one { ... } entry and change its values.
+#   name:       shop / kabadiwala name shown on the card
+#   lat, lon:   location coordinates (decimal degrees; Google Maps can provide these)
+#   share:      estimated fraction of fair scrap value offered (0.88 means 88%)
+#   speciality: short materials description shown on the card
+#   phone:      that kabadiwala's own WhatsApp number, with country code, e.g. "+91XXXXXXXXXX"
+#   areas:      area names from AREAS above where this kabadiwala serves pickups
+#
+# IMPORTANT: Enter the real, separate phone number for every dealer below.
+# Leave phone as "" until you have the dealer's permission and correct number;
+# the app will show that contact details need configuring instead of opening a bad link.
+DEALERS = [
+    {
+        "name": "Ramesh Traders",
+        "lat": 12.9140, "lon": 77.5600,
+        "share": 0.88,
+        "speciality": "Paper, plastic",
+        "phone": "",  # Put THIS dealer's WhatsApp number here, e.g. "+919876543210".
+        "areas": ["Kumaraswamy Layout", "Banashankari", "JP Nagar", "Jayanagar"],
+    },
+    {
+        "name": "Shree Metals",
+        "lat": 12.9230, "lon": 77.5530,
+        "share": 0.95,
+        "speciality": "Metals, e-waste",
+        "phone": "",  # Enter a different number if this dealer uses a different phone.
+        "areas": ["Kumaraswamy Layout", "Banashankari", "JP Nagar", "Jayanagar"],
+    },
+    {
+        "name": "Lakshmi Scrap Centre",
+        "lat": 12.9010, "lon": 77.5900,
+        "share": 0.82,
+        "speciality": "All household scrap",
+        "phone": "",  # Enter this shop's own WhatsApp number.
+        "areas": ["Kumaraswamy Layout", "Banashankari", "JP Nagar", "Jayanagar"],
+    },
+    {
+        "name": "Basavanna Recyclers",
+        "lat": 12.9300, "lon": 77.5800,
+        "share": 0.91,
+        "speciality": "Paper, cardboard, glass",
+        "phone": "",  # Enter this shop's own WhatsApp number.
+        "areas": ["Kumaraswamy Layout", "Banashankari", "JP Nagar", "Jayanagar"],
+    },
 ]
 
 SEED_BOOKS = [
@@ -1025,8 +1068,8 @@ if active_section == "Scrap Vision":
     f"""
 <div class="rl-hero">
   <div>
-    <span class="rl-pill">REUSE  ·  RECYCLE  ·  RESELL</span>
-    <h1 class="rl-display">Know what it's WORTH before you sell it.</h1>
+    <span class="rl-pill">Team Sutra · Ideathon 2026</span>
+    <h1 class="rl-display">Know what it's worth before you sell it.</h1>
     <p>Reuse it, resell it, or recycle it. ReLoop helps you decide, in that order.</p>
     <div class="rl-chips">
       <span class="rl-chip"><b>Scrap</b> priced by photo</span>
@@ -1204,8 +1247,18 @@ if active_section == "Scrap Vision":
     area = st.selectbox("Your area", list(AREAS))
     me = AREAS[area]
     rows = []
-    for name, la, lo, share, spec, phone in DEALERS:
-        rows.append(dict(name=name, km=haversine_km(me, (la, lo)), offer=fair * share, spec=spec, share=share, phone=phone))
+    for dealer in DEALERS:
+        # Show only dealers whose owner-configured service area includes this area.
+        if area not in dealer["areas"]:
+            continue
+        rows.append({
+            "name": dealer["name"],
+            "km": haversine_km(me, (dealer["lat"], dealer["lon"])),
+            "offer": fair * dealer["share"],
+            "spec": dealer["speciality"],
+            "share": dealer["share"],
+            "phone": dealer["phone"],
+        })
     rows.sort(key=lambda r: -r["offer"])
 
     user_name = (current_user.get("name") or (current_user.get("metadata") or {}).get("full_name") or "").strip()
@@ -1213,7 +1266,16 @@ if active_section == "Scrap Vision":
     dealer_cards = []
     for i, r in enumerate(rows):
         best = '<span class="rl-tag best">Best offer</span>' if i == 0 else ""
-        wa_link = whatsapp_url(r["phone"], pickup_message(r["name"], user_name, area, scrap_items, kg, fair))
+        if r["phone"].strip():
+            wa_link = whatsapp_url(
+                r["phone"], pickup_message(r["name"], user_name, area, scrap_items, kg, fair)
+            )
+            contact_action = (
+                f'<a class="rl-wa-btn" href="{html.escape(wa_link, quote=True)}" '
+                'target="_blank" rel="noopener noreferrer">Contact for pickup</a>'
+            )
+        else:
+            contact_action = '<span class="rl-wa-btn" style="opacity:.65;cursor:default">Contact number not set</span>'
         dealer_cards.append(
             '<div class="rl-dealer">'
             f'<h4>{html.escape(r["name"])}</h4>'
@@ -1222,11 +1284,14 @@ if active_section == "Scrap Vision":
             f'<div class="rl-meta">{r["share"] * 100:.0f}% of fair value</div>'
             f'<div class="rl-bar"><i style="width:{r["share"] * 100:.0f}%"></i></div>'
             f'<div class="rl-dealer-tags"><span class="rl-tag">{html.escape(r["spec"])}</span>{best}</div>'
-            f'<a class="rl-wa-btn" href="{html.escape(wa_link, quote=True)}" target="_blank" rel="noopener noreferrer">Contact for pickup</a>'
+            f'{contact_action}'
             '</div>'
         )
     st.markdown('<div class="rl-dealer-grid">' + "".join(dealer_cards) + '</div>', unsafe_allow_html=True)
-    st.caption("Dealer names, locations, offers and phone numbers are sample data for the demo.")
+    if not rows:
+        st.info("No kabadiwalas are listed for this area yet. Add one in the owner-only DEALERS section near the top of app.py.")
+    elif any(not dealer["phone"].strip() for dealer in rows):
+        st.caption("The owner can add or update each dealer and their individual WhatsApp number in the DEALERS section near the top of app.py, then redeploy the app.")
     if st.button("Save to my impact", key="save_scrap") and fair > 0:
         try:
             add_impact_record(
