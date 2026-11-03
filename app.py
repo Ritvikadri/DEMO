@@ -1276,7 +1276,7 @@ if active_section == "Scrap Vision":
                     st.info("Photo uploaded. Add GEMINI_API_KEY to Streamlit secrets to analyze it automatically, or enter materials and weights in the table.")
         else:
             st.session_state.scrap_photo_signature = None
-            st.caption("No photo yet? You can still enter materials manually on the right.")
+            st.caption("No photo yet? You can still enter materials by hand on the right.")
 
     with right:
         if st.session_state.scrap_df is None:
@@ -1300,12 +1300,43 @@ if active_section == "Scrap Vision":
         df = df[df["Material"].isin(RATES)]
         kg = float(df["Weight (kg)"].sum()) if len(df) else 0.0
         fair = float(sum(RATES[m] * w for m, w in zip(df["Material"], df["Weight (kg)"])))
+        # The selector is shown below the valuation, but its saved value is used here.
+        area = st.session_state.get("scrap_dealer_area", next(iter(AREAS)))
+        area_dealers = DEALERS_BY_AREA.get(area, [])
+        best_dealer = max(area_dealers, key=lambda dealer: dealer["share"], default=None)
+        best_offer = fair * best_dealer["share"] if best_dealer else 0.0
 
         st.markdown(
             f'<div class="rl-value"><div class="rl-meta" style="color:{SPRUCE};font-weight:500">Fair value of {kg:.1f} kg, all photos</div>'
             f'<div class="n">₹{fair * 0.9:,.0f} to ₹{fair * 1.1:,.0f}</div></div>',
             unsafe_allow_html=True,
         )
+        if st.button(
+            "Save best shop offer to my impact",
+            key="save_scrap",
+            disabled=(fair <= 0 or best_dealer is None),
+            use_container_width=True,
+        ):
+            try:
+                add_impact_record(
+                    "scrap",
+                    kg=kg,
+                    amount=best_offer,
+                    details={
+                        "materials": df.to_dict(orient="records"),
+                        "area": area,
+                        "best_offer_dealer": best_dealer["name"],
+                        "best_offer_amount": round(best_offer, 2),
+                        "estimated_fair_value": round(fair, 2),
+                    },
+                )
+                st.toast(f"Saved ₹{best_offer:,.0f} from {best_dealer['name']} to your impact.")
+            except Exception as e:
+                st.error(f"Could not save impact data. Run the Supabase setup SQL first. ({type(e).__name__})")
+        if best_dealer:
+            st.caption(f"Impact will record the highest offer for {area}: ₹{best_offer:,.0f} from {best_dealer['name']}.")
+        else:
+            st.caption(f"Add kabadiwalas for {area} in DEALERS_BY_AREA to save a shop offer to your impact.")
 
         names_now = [n for n, _ in photos]
         pr = [p for p in st.session_state.get("photo_results", []) if p["name"] in names_now]
@@ -1326,11 +1357,15 @@ if active_section == "Scrap Vision":
 
     st.markdown("&nbsp;")
     st.subheader("Who should you sell to?")
-    area = st.selectbox("Your area", list(AREAS))
+    area = st.selectbox(
+        "Your area", list(AREAS), key="scrap_dealer_area",
+        index=list(AREAS).index(area),
+    )
     me = AREAS[area]
+    area_dealers = DEALERS_BY_AREA.get(area, [])
     rows = []
     # Get the owner-maintained dealer list for only the selected neighborhood.
-    for dealer in DEALERS_BY_AREA.get(area, []):
+    for dealer in area_dealers:
         rows.append({
             "name": dealer["name"],
             "km": haversine_km(me, (dealer["lat"], dealer["lon"])),
@@ -1389,16 +1424,6 @@ if active_section == "Scrap Vision":
         st.info(f"No kabadiwalas are listed for {area} yet.")
     elif any(not dealer["phone"].strip() for dealer in rows):
         st.caption("Dealer names, locations, offers, and each dealer's own WhatsApp number are managed by the owner in DEALERS_BY_AREA near the top of app.py.")
-    if st.button("Save to my impact", key="save_scrap") and fair > 0:
-        try:
-            add_impact_record(
-                "scrap", kg=kg, amount=fair,
-                details={"materials": df.to_dict(orient="records")},
-            )
-            st.toast("Saved to your account. You can see it on the Impact tab.")
-        except Exception as e:
-            st.error(f"Could not save impact data. Run the Supabase setup SQL first. ({type(e).__name__})")
-
 # ----------------------------------------------------------------------------
 # Book Loop
 # ----------------------------------------------------------------------------
