@@ -1186,9 +1186,9 @@ if active_section == "Scrap Vision":
     <h1 class="rl-display">Know what it's worth before you sell it.</h1>
     <p>Reuse it, Resell it, or Recycle it. ReLoop helps you decide !</p>
     <div class="rl-chips">
-      <span class="rl-chip"><b>Scrap</b> priced by photo</span>
-      <span class="rl-chip"><b>Books</b> passed to juniors</span>
-      <span class="rl-chip"><b>Appliances</b> judged by sound</span>
+      <span class="rl-chip">Estimate <b>Scrap</b> prices by photo</span>
+      <span class="rl-chip">Pass Used <b>Books</b> to Juniors</span>
+      <span class="rl-chip">Judge the condition of <b>Appliances</b> by sound</span>
     </div>
   </div>
   <div class="rl-board">
@@ -1705,7 +1705,7 @@ if active_section == "Sound Check":
             appliance = other_appliance.strip() or "Other appliance"
         else:
             appliance = appliance_choice
-        st.caption("Record the appliance running steadily in a quiet place. The prototype uses one general sound check for every appliance type.")
+        st.caption("Record the appliance running steadily in a quiet place.")
         rec = st.audio_input("Record the sound")
         up = st.file_uploader("or upload a WAV or MP3 file", type=["wav", "mp3"])
         audio = rec or up
