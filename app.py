@@ -447,7 +447,7 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-bar i {{ display:block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, {MINT}, {MARIGOLD}); }}
 
 .rl-value {{ background: linear-gradient(135deg, #F7C25A, #E9A021); color: {SPRUCE}; border-radius: 22px; padding: 24px 28px;
-  box-shadow: 0 24px 60px -24px rgba(242,177,56,.55); }}
+  margin-bottom: 14px; box-shadow: 0 24px 60px -24px rgba(242,177,56,.62), 0 0 34px -22px rgba(242,177,56,.5); }}
 .rl-value .n {{ font-family:'Bricolage Grotesque'; font-size: 2.7rem; font-weight: 800; line-height:1.05; margin-top: 4px; }}
 
 .rl-verdict {{ border-radius: 24px; padding: 28px 32px; color: #fff; border: 1px solid rgba(255,255,255,.14);
@@ -570,6 +570,13 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .stButton > button:hover, .stFormSubmitButton > button:hover {{ filter: brightness(1.08); transform: translateY(-1px); color: {SPRUCE}; border: 0; }}
 .stButton > button:focus-visible {{ outline: 3px solid {MINT}; outline-offset: 2px; }}
 .stButton > button:disabled {{ background: {SURFACE2}; color: {MUTE}; box-shadow: none; }}
+.st-key-save_scrap {{ margin-top: 12px; margin-bottom: 8px; }}
+.st-key-save_scrap button {{ min-height: 60px !important; border-radius: 16px !important;
+  box-shadow: 0 0 24px rgba(242,177,56,.30), 0 12px 32px rgba(242,177,56,.28), inset 0 1px 0 rgba(255,255,255,.22) !important;
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease !important; }}
+.st-key-save_scrap button:hover {{ filter: brightness(1.10); transform: translateY(-2px);
+  box-shadow: 0 0 34px rgba(242,177,56,.46), 0 16px 38px rgba(242,177,56,.34), inset 0 1px 0 rgba(255,255,255,.28) !important; }}
+.st-key-save_scrap button:disabled {{ box-shadow: none !important; }}
 .st-key-list_book_button button {{
   --list-glow-alpha: .20; --list-glow-blur: 12px; --list-glow-spread: 0px;
   --list-shadow-alpha: .14; --list-shadow-blur: 24px;
