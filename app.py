@@ -738,7 +738,7 @@ DEALERS_BY_AREA = {
         {
             "name": "AT Scrap",
             "lat": 12.9230, "lon": 77.5530,
-            "share": 0.95,
+            "share": 0.94,
             "speciality": "Metals, Copper, Steel, Aluminium, E-Waste",
             "phone": "+916363640159",  # Enter Shree Metals' individual WhatsApp number.
         },
