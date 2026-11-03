@@ -87,61 +87,54 @@ def render_brand(size=72, show_account=False):
         st.session_state.auth_user["name"] = default_name
 
         with account_col:
-            account_logo_col, account_menu_col = st.columns([0.32, 1.5], vertical_alignment="center")
-            account_logo_col.markdown(
-                f'<div style="display:flex;justify-content:center"><img src="data:image/png;base64,{logo_data}" '
-                'alt="ReLoop" style="width:25px;height:25px;object-fit:contain;filter:grayscale(1) brightness(0) invert(1)"></div>',
-                unsafe_allow_html=True,
-            )
-            with account_menu_col:
-                with st.popover("Account", use_container_width=True):
-                    st.markdown("### Your account")
-                    st.caption("Edit the details shown on your ReLoop account and book listings.")
-                    if profile_error:
-                        st.warning("Run the latest Supabase account migration to enable profile editing.")
-                    with st.form("account_profile_form"):
-                        new_name = st.text_input("Name", value=default_name, key="account_name")
-                        new_email = st.text_input("Email", value=email_now, key="account_email")
-                        new_phone = st.text_input("Phone number", value=default_phone, key="account_phone")
-                        save_profile = st.form_submit_button("Save changes", use_container_width=True)
-                    if save_profile:
-                        if not new_name.strip():
-                            st.error("Enter your name.")
-                        elif "@" not in new_email or "." not in new_email.rsplit("@", 1)[-1]:
-                            st.error("Enter a valid email address.")
-                        elif sum(ch.isdigit() for ch in new_phone) < 7:
-                            st.error("Enter a valid phone number.")
-                        else:
-                            try:
-                                attrs = {"data": {"full_name": new_name.strip(), "phone": new_phone.strip()}}
-                                email_changed = new_email.strip().lower() != email_now.lower()
-                                if email_changed:
-                                    attrs["email"] = new_email.strip()
-                                client.auth.update_user(attrs)
-                                client.table("user_profiles").upsert({
-                                    "user_id": user_id,
-                                    "email": email_now if email_changed else new_email.strip(),
-                                    "full_name": new_name.strip(),
-                                    "phone": new_phone.strip(),
-                                }, on_conflict="user_id").execute()
-                                st.session_state.auth_user["name"] = new_name.strip()
-                                st.session_state.auth_user["phone"] = new_phone.strip()
-                                if email_changed:
-                                    st.info("Confirm the email change using the link sent by Supabase. Your current email remains active until confirmation.")
-                                else:
-                                    st.success("Account details updated.")
-                                st.rerun()
-                            except Exception as e:
-                                st.error(f"Could not update your account. ({type(e).__name__})")
-
-                    st.divider()
-                    if st.button("Log out", key="account_logout", use_container_width=True):
+            with st.popover("Account", use_container_width=True):
+                st.markdown("### Your account")
+                st.caption("Edit the details shown on your ReLoop account and book listings.")
+                if profile_error:
+                    st.warning("Run the latest Supabase account migration to enable profile editing.")
+                with st.form("account_profile_form"):
+                    new_name = st.text_input("Name", value=default_name, key="account_name")
+                    new_email = st.text_input("Email", value=email_now, key="account_email")
+                    new_phone = st.text_input("Phone number", value=default_phone, key="account_phone")
+                    save_profile = st.form_submit_button("Save changes", use_container_width=True)
+                if save_profile:
+                    if not new_name.strip():
+                        st.error("Enter your name.")
+                    elif "@" not in new_email or "." not in new_email.rsplit("@", 1)[-1]:
+                        st.error("Enter a valid email address.")
+                    elif sum(ch.isdigit() for ch in new_phone) < 7:
+                        st.error("Enter a valid phone number.")
+                    else:
                         try:
-                            client.auth.sign_out()
-                        finally:
-                            for key in ("auth_user", "auth_token", "supabase_client"):
-                                st.session_state.pop(key, None)
+                            attrs = {"data": {"full_name": new_name.strip(), "phone": new_phone.strip()}}
+                            email_changed = new_email.strip().lower() != email_now.lower()
+                            if email_changed:
+                                attrs["email"] = new_email.strip()
+                            client.auth.update_user(attrs)
+                            client.table("user_profiles").upsert({
+                                "user_id": user_id,
+                                "email": email_now if email_changed else new_email.strip(),
+                                "full_name": new_name.strip(),
+                                "phone": new_phone.strip(),
+                            }, on_conflict="user_id").execute()
+                            st.session_state.auth_user["name"] = new_name.strip()
+                            st.session_state.auth_user["phone"] = new_phone.strip()
+                            if email_changed:
+                                st.info("Confirm the email change using the link sent by Supabase. Your current email remains active until confirmation.")
+                            else:
+                                st.success("Account details updated.")
                             st.rerun()
+                        except Exception as e:
+                            st.error(f"Could not update your account. ({type(e).__name__})")
+
+                st.divider()
+                if st.button("Log out", key="account_logout", use_container_width=True):
+                    try:
+                        client.auth.sign_out()
+                    finally:
+                        for key in ("auth_user", "auth_token", "supabase_client"):
+                            st.session_state.pop(key, None)
+                        st.rerun()
 
 
 @lru_cache(maxsize=1)
@@ -639,7 +632,7 @@ st.markdown(CSS, unsafe_allow_html=True)
 # ----------------------------------------------------------------------------
 st.markdown(
     '<div class="rl-workspace-bar"><span class="rl-eyebrow">Your ReLoop workspace</span>'
-    '<span class="rl-hint"></span></div>',
+    '<span class="rl-hint">Choose a section to get started</span></div>',
     unsafe_allow_html=True,
 )
 st.session_state.setdefault("active_section", "Scrap Vision")
@@ -1724,3 +1717,4 @@ if active_section == "Impact":
         + '</div>',
         unsafe_allow_html=True,
     )
+
