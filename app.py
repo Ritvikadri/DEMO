@@ -1354,7 +1354,7 @@ if active_section == "Scrap Vision":
             except Exception as e:
                 st.error(f"Could not save impact data. Run the Supabase setup SQL first. ({type(e).__name__})")
         if best_dealer:
-            st.caption(f"Impact will record the highest offer for {area}: ₹{best_offer:,.0f} from {best_dealer['name']}.")
+            pass
         else:
             st.caption(f"Add kabadiwalas for {area} in DEALERS_BY_AREA to save a shop offer to your impact.")
 
