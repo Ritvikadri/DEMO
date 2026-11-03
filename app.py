@@ -1317,7 +1317,7 @@ if active_section == "Scrap Vision":
         )
     st.markdown('<div class="rl-dealer-grid">' + "".join(dealer_cards) + '</div>', unsafe_allow_html=True)
     if not rows:
-        st.info(f"No kabadiwalas are listed for {area} yet. Add one under DEALERS_BY_AREA[\"{area}\"] near the top of app.py.")
+        st.info(f"No kabadiwalas are listed for {area} yet.")
     elif any(not dealer["phone"].strip() for dealer in rows):
         st.caption("Dealer names, locations, offers, and each dealer's own WhatsApp number are managed by the owner in DEALERS_BY_AREA near the top of app.py.")
     if st.button("Save to my impact", key="save_scrap") and fair > 0:
