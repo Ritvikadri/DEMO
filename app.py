@@ -755,7 +755,7 @@ DEALERS_BY_AREA = {
             "share": 0.94,
             "speciality": "Metals, Copper, Steel, Aluminium, E-Waste",
             "phone": "+916363640159",  # Enter Shree Metals' individual WhatsApp number.
-            "maps_url": "",  # Paste AT Scrap's Google Maps share link here.
+            "maps_url": "https://www.google.com/maps/place/AT+Scrap+-+Metal,+Copper,+Aluminium+and+Electronic+Items/@12.9154428,77.5344925,14z/data=!4m10!1m2!2m1!1sscrap+shop+near+jp+nagar!3m6!1s0x3bae151f6301d38f:0xaff5d348a20e5ba6!8m2!3d12.9154428!4d77.5726013!15sChhzY3JhcCBzaG9wIG5lYXIganAgbmFnYXJaGiIYc2NyYXAgc2hvcCBuZWFyIGpwIG5hZ2FykgEMc2FsdmFnZV95YXJk4AEA!16s%2Fg%2F11w2k6yz06?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste AT Scrap's Google Maps share link here.
         },
     ],
     "Jayanagar": [
