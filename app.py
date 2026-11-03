@@ -1022,6 +1022,19 @@ def detect_raw(img_bytes, model, key):
     return df, dict(model=model, resize=t_resize, api=t_api)
 
 
+def detect_raw_with_auto_reverify(img_bytes, model, key):
+    """Retry one photo up to two times when Gemini omits its required items field."""
+    for attempt in range(3):
+        try:
+            return detect_raw(img_bytes, model, key)
+        except KeyError as exc:
+            # This is the specific incomplete Gemini response shown in the app.
+            # A short pause gives the next request a chance to return valid JSON.
+            if exc.args != ("items",) or attempt == 2:
+                raise
+            time.sleep(0.4 * (attempt + 1))
+
+
 def analyze_photos(photos, picks, force=False):
     """Analyses every photo at the same time. Returns (results, errors). Repeat photos come from a cache."""
     key, model = get_api_key(), get_model()
@@ -1037,7 +1050,7 @@ def analyze_photos(photos, picks, force=False):
     errors = []
     if todo:
         with ThreadPoolExecutor(max_workers=min(4, len(todo))) as ex:
-            futs = [(i, h, ex.submit(detect_raw, data, model, key)) for i, h, data in todo]
+            futs = [(i, h, ex.submit(detect_raw_with_auto_reverify, data, model, key)) for i, h, data in todo]
             for i, h, f in futs:
                 try:
                     results[i] = cache[h] = f.result()
@@ -1290,11 +1303,6 @@ if active_section == "Scrap Vision":
                     with st.spinner(f"Reading {len(photos)} photo{'s' if len(photos) != 1 else ''}..."):
                         t0 = time.perf_counter()
                         results, errors = analyze_photos(photos, [], force=reverify)
-                        # Retry once automatically if Gemini returns malformed
-                        # JSON without the expected "items" field.
-                        if any("KeyError" in err and "'items'" in err for err in errors):
-                            with st.spinner("Gemini returned an incomplete result. Rechecking the photo once..."):
-                                results, errors = analyze_photos(photos, [], force=True)
                         elapsed = time.perf_counter() - t0
                     st.session_state.photo_results = [
                         dict(name=n, df=r[0], tm=r[1]) for (n, _), r in zip(photos, results)
