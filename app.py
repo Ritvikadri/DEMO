@@ -457,11 +457,11 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 
 /* ---------- impact dashboard ---------- */
 .rl-imp-grid {{ display: grid; gap: 24px; margin: 0 0 26px 0; align-items: stretch; }}
-.rl-imp-grid.g-head {{ grid-template-columns: 2fr 1fr; }}
+.rl-imp-grid.g-head {{ grid-template-columns: 2fr 1fr; align-items: start; }}
 .rl-imp-grid.g-three {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
 .rl-imp-grid.g-detail {{ grid-template-columns: 1fr 1.4fr; }}
 .rl-imp-grid > div {{ box-sizing: border-box; min-width: 0; }}
-.rl-imp-hero {{ position: relative; overflow: hidden; box-sizing: border-box; min-height: 250px; border-radius: 26px; padding: 30px 34px;
+.rl-imp-hero {{ position: relative; overflow: hidden; box-sizing: border-box; min-height: 0; align-self: start; border-radius: 26px; padding: 26px 30px;
   background:
     radial-gradient(520px 260px at 100% 0%, rgba(242,177,56,.26), transparent 62%),
     radial-gradient(440px 280px at 0% 100%, rgba(111,211,176,.16), transparent 62%),
@@ -472,29 +472,29 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
   background: linear-gradient(90deg, #FFD45C 0%, {MARIGOLD} 45%, {MINT} 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
   font-variant-numeric: tabular-nums; }}
 .rl-imp-sub {{ color: #B7C9C4; max-width: 46ch; line-height: 1.5; }}
-.rl-imp-split {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }}
+.rl-imp-split {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }}
 .rl-imp-split span {{ background: rgba(255,255,255,.05); border: 1px solid {LINE}; border-radius: 12px; padding: 8px 14px; color: {MUTE}; font-size: .9rem; }}
 .rl-imp-split b {{ color: {TEXT}; font-weight: 700; margin-right: 4px; font-variant-numeric: tabular-nums; }}
 
-.rl-imp-level {{ box-sizing: border-box; min-height: 250px; border-radius: 26px; padding: 26px 28px; border: 1px solid {LINE};
+.rl-imp-level {{ box-sizing: border-box; min-height: 0; align-self: start; border-radius: 26px; padding: 24px 26px; border: 1px solid {LINE};
   background: linear-gradient(180deg, {SURFACE2} 0%, {SURFACE} 100%); box-shadow: 0 18px 40px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.04); }}
-.rl-imp-levelrow {{ display: flex; align-items: center; gap: 16px; margin: 16px 0 18px 0; }}
+.rl-imp-levelrow {{ display: flex; align-items: center; gap: 14px; margin: 13px 0 14px 0; }}
 .rl-imp-badge {{ width: 60px; height: 60px; flex: none; border-radius: 18px; display: grid; place-items: center; font-size: 1.9rem;
   background: rgba(242,177,56,.14); border: 1px solid rgba(242,177,56,.4); }}
 .rl-imp-pts {{ font-family: 'Bricolage Grotesque', sans-serif; font-size: 2.4rem; font-weight: 800; line-height: 1; color: {MARIGOLD}; font-variant-numeric: tabular-nums; }}
 .rl-imp-lvl {{ color: {TEXT}; font-weight: 600; margin-top: 4px; }}
 .rl-imp-progress {{ height: 10px; border-radius: 99px; background: #0A1514; overflow: hidden; }}
 .rl-imp-progress i {{ display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, {MINT}, {MARIGOLD}); }}
-.rl-imp-next {{ color: {TEXT}; font-size: .92rem; margin-top: 10px; }}
-.rl-imp-tip {{ color: {MUTE}; font-size: .85rem; margin-top: 6px; }}
-.rl-imp-contrib {{ margin-top:14px; padding:10px 12px; border-radius:12px; background:rgba(111,211,176,.07);
-  border:1px solid rgba(111,211,176,.16); color:{MUTE}; font-size:.84rem; line-height:1.45; }}
+.rl-imp-next {{ color: {TEXT}; font-size: .9rem; margin-top: 8px; }}
+.rl-imp-tip {{ color: {MUTE}; font-size: .78rem; line-height:1.4; margin-top: 10px; }}
+.rl-imp-contrib {{ margin-top:10px; padding:8px 10px; border-radius:11px; background:rgba(111,211,176,.07);
+  border:1px solid rgba(111,211,176,.16); color:{MUTE}; font-size:.8rem; line-height:1.35; }}
 .rl-imp-contrib b {{ color:{TEXT}; }}
-.rl-imp-benchmarks {{ display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }}
-.rl-imp-benchmark {{ display:flex; align-items:center; gap:5px; padding:5px 8px; border-radius:10px;
-  background:rgba(255,255,255,.035); border:1px solid {LINE}; color:{MUTE}; font-size:.72rem; }}
+.rl-imp-benchmarks {{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; margin-top:10px; }}
+.rl-imp-benchmark {{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-width:0; padding:6px 3px; border-radius:9px;
+  background:rgba(255,255,255,.035); border:1px solid {LINE}; color:{MUTE}; font-size:.66rem; text-align:center; }}
 .rl-imp-benchmark b {{ color:{TEXT}; font-weight:650; }}
-.rl-imp-benchmark small {{ color:{MUTE}; font-size:.68rem; }}
+.rl-imp-benchmark small {{ color:{MUTE}; font-size:.62rem; }}
 .rl-imp-benchmark.current {{ border-color:rgba(242,177,56,.52); background:rgba(242,177,56,.10); }}
 .rl-imp-benchmark.current b {{ color:{MARIGOLD}; }}
 
@@ -530,6 +530,9 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-imp-amt {{ font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 1.05rem; white-space: nowrap; }}
 @media (max-width: 900px) {{
   .rl-imp-grid.g-head, .rl-imp-grid.g-three, .rl-imp-grid.g-detail {{ grid-template-columns: 1fr; gap: 18px; }}
+  .rl-imp-benchmarks {{ grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }}
+  .rl-imp-benchmark {{ font-size: .62rem; padding: 6px 2px; }}
+  .rl-imp-benchmark small {{ font-size: .58rem; }}
   .rl-imp-big {{ font-size: 2.8rem; }}
   .rl-imp-hero, .rl-imp-level {{ min-height: 0; }}
 }}
@@ -1184,9 +1187,9 @@ if active_section == "Scrap Vision":
     <h1 class="rl-display">Know what it's worth before you sell it.</h1>
     <p>Reuse it, Resell it, or Recycle it. ReLoop helps you decide !</p>
     <div class="rl-chips">
-      <span class="rl-chip">Estimate <b>Scrap</b> prices by photo</span>
-      <span class="rl-chip">Pass Used <b>Books</b> to Juniors</span>
-      <span class="rl-chip">Judge the condition of <b>Appliances</b> by sound</span>
+      <span class="rl-chip"><b>Scrap</b> priced by photo</span>
+      <span class="rl-chip"><b>Books</b> passed to juniors</span>
+      <span class="rl-chip"><b>Appliances</b> judged by sound</span>
     </div>
   </div>
   <div class="rl-board">
@@ -1703,7 +1706,7 @@ if active_section == "Sound Check":
             appliance = other_appliance.strip() or "Other appliance"
         else:
             appliance = appliance_choice
-        st.caption("Record the appliance running steadily in a quiet place.")
+        st.caption("Record the appliance running steadily in a quiet place. The prototype uses one general sound check for every appliance type.")
         rec = st.audio_input("Record the sound")
         up = st.file_uploader("or upload a WAV or MP3 file", type=["wav", "mp3"])
         audio = rec or up
@@ -1895,7 +1898,7 @@ if active_section == "Impact":
         f'<div class="rl-imp-next">{next_text}</div>'
         f'<div class="rl-imp-contrib"><b>Your contribution:</b> {len(sale_rows)} books sold · {points_total:,} points earned.</div>'
         f'<div class="rl-imp-benchmarks">{benchmark_html}</div>'
-        '<div class="rl-imp-tip">Earn 100 points when a listed book is marked Sold. Scrap valuations, book requests, and sound checks are tracked in your impact totals, but do not currently add points.</div>'
+        '<div class="rl-imp-tip">Points: +100 for each book you mark Sold. Other activities count toward your impact totals, not points.</div>'
         '</div>'
     )
     st.markdown(f'<div class="rl-imp-grid g-head">{hero_html}{level_html}</div>', unsafe_allow_html=True)
