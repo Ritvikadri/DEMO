@@ -1238,7 +1238,7 @@ components.html(
 # Scrap Vision
 # ----------------------------------------------------------------------------
 if active_section == "Scrap Vision":
-    st.subheader("What is your scrap worth?")
+    st.subheader("What is your scrap worth ?")
     left, right = st.columns([1, 1.15], gap="large")
     photos = []
 
@@ -1373,7 +1373,7 @@ if active_section == "Scrap Vision":
             a1.metric("Photos", len(pr))
             a2.metric("Average price per kg", f"₹{fair / kg:,.1f}" if kg else "n/a")
             a3.metric("Average per photo", f"₹{fair / len(pr):,.0f}")
-            st.caption("Per-photo rows are the AI estimates. The averages use the combined table above, including your edits.")
+            st.caption("Values are AI estimated. You can edit the values if needed.")
 
     st.markdown("&nbsp;")
     st.subheader("Who should you sell to?")
