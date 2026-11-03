@@ -703,32 +703,45 @@ DEALERS_BY_AREA = {
             "lat": 12.9140, "lon": 77.5600,
             "share": 0.88,
             "speciality": "Paper, plastic",
-            "phone": "",  # Enter Ramesh Traders' individual WhatsApp number.
+            "phone": "+917625016830",  # Enter Ramesh Traders' individual WhatsApp number.
         },
         {
             "name": "Shree Metals",
             "lat": 12.9230, "lon": 77.5530,
             "share": 0.95,
             "speciality": "Metals, e-waste",
-            "phone": "",  # Enter Shree Metals' individual WhatsApp number.
+            "phone": "+917625016830",  # Enter Shree Metals' individual WhatsApp number.
         },
         {
             "name": "Lakshmi Scrap Centre",
             "lat": 12.9010, "lon": 77.5900,
             "share": 0.82,
             "speciality": "All household scrap",
-            "phone": "",  # Enter Lakshmi Scrap Centre's individual number.
+            "phone": "+917625016830",  # Enter Lakshmi Scrap Centre's individual number.
         },
         {
             "name": "Basavanna Recyclers",
             "lat": 12.9300, "lon": 77.5800,
             "share": 0.91,
             "speciality": "Paper, cardboard, glass",
-            "phone": "",  # Enter Basavanna Recyclers' individual number.
+            "phone": "+917625016830",  # Enter Basavanna Recyclers' individual number.
         },
     ],
     "JP Nagar": [
-        # Add only verified kabadiwalas who serve JP Nagar here.
+        {
+            "name": "AMS Scrap Mercant",
+            "lat": 12.9140, "lon": 77.5600,
+            "share": 0.88,
+            "speciality": "Metal, Steel, Copper",
+            "phone": "+919845647024",  # Enter Ramesh Traders' individual WhatsApp number.
+        },
+        {
+            "name": "AT Scrap",
+            "lat": 12.9230, "lon": 77.5530,
+            "share": 0.95,
+            "speciality": "Metals, Copper, Steel, Aluminium, E-Waste",
+            "phone": "+916363640159",  # Enter Shree Metals' individual WhatsApp number.
+        },
     ],
     "Jayanagar": [
         # Add only verified kabadiwalas who serve Jayanagar here.
