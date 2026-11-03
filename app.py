@@ -1286,8 +1286,7 @@ if active_section == "Scrap Vision":
                         pd.concat([r[0] for r in results])
                         .groupby("Material", as_index=False, sort=False)["Weight (kg)"].sum()
                     )
-                    st.caption(f"Analysed {len(photos)} photo{'s' if len(photos) != 1 else ''} in {elapsed:.1f}s "
-                               f"with {results[0][1]['model']}. All photos are combined in the table.")
+                    
                     if errors:
                         st.warning("Some photos could not be analysed. Add their materials and weights in the table.")
                         st.error("Gemini error: " + " || ".join(errors)[:700])
