@@ -632,7 +632,7 @@ st.markdown(CSS, unsafe_allow_html=True)
 # ----------------------------------------------------------------------------
 st.markdown(
     '<div class="rl-workspace-bar"><span class="rl-eyebrow">Your ReLoop workspace</span>'
-    '<span class="rl-hint">Choose a section to get started</span></div>',
+    '<span class="rl-hint"></span></div>',
     unsafe_allow_html=True,
 )
 st.session_state.setdefault("active_section", "Scrap Vision")
