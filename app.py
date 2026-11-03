@@ -1749,8 +1749,8 @@ if active_section == "Sound Check":
 # ----------------------------------------------------------------------------
 # Impact
 # ----------------------------------------------------------------------------
-LEVELS = [(0, "Seedling", "🌱"), (100, "Sprout", "🌿"), (300, "Grower", "🌳"),
-          (600, "Champion", "🏆"), (1000, "Legend", "🌍")]
+LEVELS = [(0, "Seedling", "🌱"), (100, "Sprout", "🌿"),
+          (1000, "Champion", "🏆"), (3000, "Legend", "🌍")]
 VERDICT_LABELS = {"RESELL": ("Resell", MINT), "REPAIR": ("Repair", MARIGOLD), "SCRAP": ("Scrap", CORAL)}
 BAR_COLOURS = [MINT, MARIGOLD, CORAL, "#9DB7FF", "#C7A6FF", "#7FD1E8"]
 
