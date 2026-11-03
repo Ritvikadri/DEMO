@@ -1180,7 +1180,7 @@ if active_section == "Scrap Vision":
     </div>
   </div>
   <div class="rl-board">
-    <h4><span class="rl-dot"></span>Today's scrap rates (sample)</h4>
+    <h4><span class="rl-dot"></span>Today's SCRAP Rates</h4>
     {board_rows}
   </div>
 </div>
