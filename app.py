@@ -672,51 +672,68 @@ AREAS = {
 # This is deliberately a Python configuration (there is no public edit form),
 # so only someone who can edit and redeploy the app's source code can change it.
 #
-# To add a kabadiwala, copy one { ... } entry and change its values.
+# Put each place's kabadiwalas under that place's exact name. Dealers in one
+# place will NOT appear when a user selects a different place.
+# To add a place, add it to AREAS above, then create a matching key below.
+# To add a kabadiwala, copy one dealer entry inside the correct place's list.
 #   name:       shop / kabadiwala name shown on the card
-#   lat, lon:   location coordinates (decimal degrees; Google Maps can provide these)
-#   share:      estimated fraction of fair scrap value offered (0.88 means 88%)
+#   lat, lon:   dealer's map coordinates in decimal degrees
+#   share:      estimated fair value fraction (0.88 means 88%)
 #   speciality: short materials description shown on the card
-#   phone:      that kabadiwala's own WhatsApp number, with country code, e.g. "+91XXXXXXXXXX"
-#   areas:      area names from AREAS above where this kabadiwala serves pickups
+#   phone:      that dealer's individual WhatsApp number with country code
+#               (example format: "+919876543210"). Leave blank until confirmed.
 #
-# IMPORTANT: Enter the real, separate phone number for every dealer below.
-# Leave phone as "" until you have the dealer's permission and correct number;
-# the app will show that contact details need configuring instead of opening a bad link.
-DEALERS = [
-    {
-        "name": "Ramesh Traders",
-        "lat": 12.9140, "lon": 77.5600,
-        "share": 0.88,
-        "speciality": "Paper, plastic",
-        "phone": "",  # Put THIS dealer's WhatsApp number here, e.g. "+919876543210".
-        "areas": ["Kumaraswamy Layout", "Banashankari", "JP Nagar", "Jayanagar"],
-    },
-    {
-        "name": "Shree Metals",
-        "lat": 12.9230, "lon": 77.5530,
-        "share": 0.95,
-        "speciality": "Metals, e-waste",
-        "phone": "",  # Enter a different number if this dealer uses a different phone.
-        "areas": ["Kumaraswamy Layout", "Banashankari", "JP Nagar", "Jayanagar"],
-    },
-    {
-        "name": "Lakshmi Scrap Centre",
-        "lat": 12.9010, "lon": 77.5900,
-        "share": 0.82,
-        "speciality": "All household scrap",
-        "phone": "",  # Enter this shop's own WhatsApp number.
-        "areas": ["Kumaraswamy Layout", "Banashankari", "JP Nagar", "Jayanagar"],
-    },
-    {
-        "name": "Basavanna Recyclers",
-        "lat": 12.9300, "lon": 77.5800,
-        "share": 0.91,
-        "speciality": "Paper, cardboard, glass",
-        "phone": "",  # Enter this shop's own WhatsApp number.
-        "areas": ["Kumaraswamy Layout", "Banashankari", "JP Nagar", "Jayanagar"],
-    },
-]
+# Replace the sample dealer entries and blank phone numbers with real, verified
+# details. When phone is blank, the app won't create a broken WhatsApp link.
+# Copy this example entry into the list for the right place, then replace values:
+# {
+#     "name": "Shop name",
+#     "lat": 12.9000, "lon": 77.5600,  # Use this shop's map coordinates.
+#     "share": 0.90,                   # 0.90 means an estimated 90% of fair value.
+#     "speciality": "Paper, plastic",
+#     "phone": "+919876543210",       # Enter this dealer's own WhatsApp number.
+# },
+DEALERS_BY_AREA = {
+    "Kumaraswamy Layout": [
+        # Add only verified kabadiwalas who serve Kumaraswamy Layout here.
+    ],
+    "Banashankari": [
+        {
+            "name": "Ramesh Traders",
+            "lat": 12.9140, "lon": 77.5600,
+            "share": 0.88,
+            "speciality": "Paper, plastic",
+            "phone": "",  # Enter Ramesh Traders' individual WhatsApp number.
+        },
+        {
+            "name": "Shree Metals",
+            "lat": 12.9230, "lon": 77.5530,
+            "share": 0.95,
+            "speciality": "Metals, e-waste",
+            "phone": "",  # Enter Shree Metals' individual WhatsApp number.
+        },
+        {
+            "name": "Lakshmi Scrap Centre",
+            "lat": 12.9010, "lon": 77.5900,
+            "share": 0.82,
+            "speciality": "All household scrap",
+            "phone": "",  # Enter Lakshmi Scrap Centre's individual number.
+        },
+        {
+            "name": "Basavanna Recyclers",
+            "lat": 12.9300, "lon": 77.5800,
+            "share": 0.91,
+            "speciality": "Paper, cardboard, glass",
+            "phone": "",  # Enter Basavanna Recyclers' individual number.
+        },
+    ],
+    "JP Nagar": [
+        # Add only verified kabadiwalas who serve JP Nagar here.
+    ],
+    "Jayanagar": [
+        # Add only verified kabadiwalas who serve Jayanagar here.
+    ],
+}
 
 SEED_BOOKS = [
     ("HC Verma: Concepts of Physics, Vol 1", "JEE", "Physics", "Good", 495, 200, "Sadhvi"),
@@ -1247,10 +1264,8 @@ if active_section == "Scrap Vision":
     area = st.selectbox("Your area", list(AREAS))
     me = AREAS[area]
     rows = []
-    for dealer in DEALERS:
-        # Show only dealers whose owner-configured service area includes this area.
-        if area not in dealer["areas"]:
-            continue
+    # Get the owner-maintained dealer list for only the selected neighborhood.
+    for dealer in DEALERS_BY_AREA.get(area, []):
         rows.append({
             "name": dealer["name"],
             "km": haversine_km(me, (dealer["lat"], dealer["lon"])),
@@ -1289,9 +1304,9 @@ if active_section == "Scrap Vision":
         )
     st.markdown('<div class="rl-dealer-grid">' + "".join(dealer_cards) + '</div>', unsafe_allow_html=True)
     if not rows:
-        st.info("No kabadiwalas are listed for this area yet. Add one in the owner-only DEALERS section near the top of app.py.")
+        st.info(f"No kabadiwalas are listed for {area} yet. Add one under DEALERS_BY_AREA[\"{area}\"] near the top of app.py.")
     elif any(not dealer["phone"].strip() for dealer in rows):
-        st.caption("The owner can add or update each dealer and their individual WhatsApp number in the DEALERS section near the top of app.py, then redeploy the app.")
+        st.caption("Dealer names, locations, offers, and each dealer's own WhatsApp number are managed by the owner in DEALERS_BY_AREA near the top of app.py.")
     if st.button("Save to my impact", key="save_scrap") and fair > 0:
         try:
             add_impact_record(
