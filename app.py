@@ -1186,10 +1186,10 @@ if active_section == "Scrap Vision":
 </div>
 <div class="rl-ticker"><div class="rl-track">{ticker}{ticker}</div></div>
 <div class="rl-flow">
-  <div><span class="rl-step">01 · START</span><b>Capture</b><span>Photo, book or sound</span></div>
-  <div><span class="rl-step">02 · UNDERSTAND</span><b>Analyse</b><span>Vision and audio AI</span></div>
-  <div><span class="rl-step">03 · CHOOSE</span><b>Decide</b><span>Value, resell or recycle</span></div>
-  <div><span class="rl-step">04 · COMPLETE</span><b>Connect</b><span>Local collector or buyer</span></div>
+  <div><span class="rl-step">01 · START</span><b>Capture</b><span>Photo, Sound or Text</span></div>
+  <div><span class="rl-step">02 · UNDERSTAND</span><b>Analyse</b><span>Analyse using AI</span></div>
+  <div><span class="rl-step">03 · CHOOSE</span><b>Decide</b><span>Reuse, Resell or Recycle</span></div>
+  <div><span class="rl-step">04 · COMPLETE</span><b>Connect</b><span>Local Scrap Collector or Buyer</span></div>
 </div>
 """,
         unsafe_allow_html=True,
