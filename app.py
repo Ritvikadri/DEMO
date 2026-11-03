@@ -989,7 +989,7 @@ def detect_raw(img_bytes, model, key):
     return df, dict(model=model, resize=t_resize, api=t_api)
 
 
-def analyze_photos(photos, picks):
+def analyze_photos(photos, picks, force=False):
     """Analyses every photo at the same time. Returns (results, errors). Repeat photos come from a cache."""
     key, model = get_api_key(), get_model()
     cache = st.session_state.setdefault("detect_cache", {})
@@ -997,7 +997,7 @@ def analyze_photos(photos, picks):
     todo = []
     for i, (name, data) in enumerate(photos):
         h = hashlib.sha1(data).hexdigest() + model
-        if h in cache:
+        if h in cache and not force:
             results[i] = cache[h]
         else:
             todo.append((i, h, data))
@@ -1244,18 +1244,19 @@ if active_section == "Scrap Vision":
             for i, (n, data) in enumerate(photos):
                 gcols[i % len(gcols)].image(data, caption=n, use_container_width=True)
             st.caption(f"{len(photos)} photo{'s' if len(photos) != 1 else ''} in the pile. Add more any time, they all stay.")
+            reverify = st.button("↻ Reverify", key="reverify_photos")
             # Analyze automatically once when the uploaded/captured photo set changes.
             # Its signature prevents API calls from repeating on normal Streamlit reruns.
             photo_signature = tuple(
                 (name, hashlib.sha1(data).hexdigest()) for name, data in photos
             )
-            if photo_signature != st.session_state.get("scrap_photo_signature"):
+            if reverify or photo_signature != st.session_state.get("scrap_photo_signature"):
                 st.session_state.scrap_photo_signature = photo_signature
                 st.session_state.scrap_ver += 1
                 if has_api_key():
                     with st.spinner(f"Reading {len(photos)} photo{'s' if len(photos) != 1 else ''}..."):
                         t0 = time.perf_counter()
-                        results, errors = analyze_photos(photos, [])
+                        results, errors = analyze_photos(photos, [], force=reverify)
                         elapsed = time.perf_counter() - t0
                     st.session_state.photo_results = [
                         dict(name=n, df=r[0], tm=r[1]) for (n, _), r in zip(photos, results)
