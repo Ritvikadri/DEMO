@@ -632,7 +632,7 @@ st.markdown(CSS, unsafe_allow_html=True)
 # ----------------------------------------------------------------------------
 st.markdown(
     '<div class="rl-workspace-bar"><span class="rl-eyebrow">Your ReLoop workspace</span>'
-    '<span class="rl-hint">Choose a section to get started</span></div>',
+    '<span class="rl-hint"></span></div>',
     unsafe_allow_html=True,
 )
 st.session_state.setdefault("active_section", "Scrap Vision")
@@ -1098,7 +1098,7 @@ if active_section == "Scrap Vision":
     f"""
 <div class="rl-hero">
   <div>
-    <span class="rl-pill">Team Sutra · Ideathon 2026</span>
+    <span class="rl-pill">REUSE · RECYCLE · RESELL</span>
     <h1 class="rl-display">Know what it's worth before you sell it.</h1>
     <p>Reuse it, resell it, or recycle it. ReLoop helps you decide, in that order.</p>
     <div class="rl-chips">
@@ -1307,7 +1307,6 @@ if active_section == "Scrap Vision":
         dealer_cards.append(
             '<div class="rl-dealer">'
             f'<h4>{html.escape(r["name"])}</h4>'
-            f'<div class="rl-meta">{r["km"]:.1f} km away</div>'
             f'<div class="rl-price">₹{r["offer"]:,.0f}</div>'
             f'<div class="rl-meta">{r["share"] * 100:.0f}% of fair value</div>'
             f'<div class="rl-bar"><i style="width:{r["share"] * 100:.0f}%"></i></div>'
