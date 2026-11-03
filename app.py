@@ -571,12 +571,26 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .stButton > button:focus-visible {{ outline: 3px solid {MINT}; outline-offset: 2px; }}
 .stButton > button:disabled {{ background: {SURFACE2}; color: {MUTE}; box-shadow: none; }}
 .st-key-save_scrap {{ margin-top: 12px; margin-bottom: 8px; }}
-.st-key-save_scrap button {{ min-height: 60px !important; border-radius: 16px !important;
+.st-key-save_scrap div.stButton > button {{ min-height: 60px !important; border-radius: 16px !important;
+  background: linear-gradient(135deg, #FFD45C, #F2B138) !important; color: {SPRUCE} !important;
+  -webkit-text-fill-color: {SPRUCE} !important; opacity: 1 !important;
   box-shadow: 0 0 24px rgba(242,177,56,.30), 0 12px 32px rgba(242,177,56,.28), inset 0 1px 0 rgba(255,255,255,.22) !important;
   transition: transform .18s ease, filter .18s ease, box-shadow .18s ease !important; }}
-.st-key-save_scrap button:hover {{ filter: brightness(1.10); transform: translateY(-2px);
+.st-key-save_scrap div.stButton > button:hover,
+.st-key-save_scrap div.stButton > button:active,
+.st-key-save_scrap div.stButton > button:focus-visible {{ background: linear-gradient(135deg, #FFE078, #F7BC45) !important;
+  color: {SPRUCE} !important; -webkit-text-fill-color: {SPRUCE} !important; filter: brightness(1.06) !important; transform: translateY(-2px);
   box-shadow: 0 0 34px rgba(242,177,56,.46), 0 16px 38px rgba(242,177,56,.34), inset 0 1px 0 rgba(255,255,255,.28) !important; }}
-.st-key-save_scrap button:disabled {{ box-shadow: none !important; }}
+.st-key-save_scrap div.stButton > button:disabled {{ background: {SURFACE2} !important; color: {MUTE} !important;
+  -webkit-text-fill-color: {MUTE} !important; box-shadow: none !important; opacity: .7 !important; transform: none !important; }}
+.st-key-reverify_photos div.stButton > button {{ background: linear-gradient(135deg, #FFD45C, #F2B138) !important;
+  color: {SPRUCE} !important; -webkit-text-fill-color: {SPRUCE} !important; opacity: 1 !important;
+  box-shadow: 0 10px 24px -10px rgba(242,177,56,.72) !important; transition: transform .16s ease, filter .16s ease, box-shadow .16s ease !important; }}
+.st-key-reverify_photos div.stButton > button:hover,
+.st-key-reverify_photos div.stButton > button:active,
+.st-key-reverify_photos div.stButton > button:focus-visible {{ background: linear-gradient(135deg, #FFE078, #F7BC45) !important;
+  color: {SPRUCE} !important; -webkit-text-fill-color: {SPRUCE} !important; filter: brightness(1.06) !important;
+  transform: translateY(-1px); box-shadow: 0 0 26px rgba(242,177,56,.48), 0 12px 28px -8px rgba(242,177,56,.62) !important; }}
 .st-key-list_book_button button {{
   --list-glow-alpha: .20; --list-glow-blur: 12px; --list-glow-spread: 0px;
   --list-shadow-alpha: .14; --list-shadow-blur: 24px;
@@ -1156,7 +1170,7 @@ if active_section == "Scrap Vision":
     f"""
 <div class="rl-hero">
   <div>
-    <span class="rl-pill">REUSE · RESELL · RECYCLE</span>
+    <span class="rl-pill">REUSE · RECYCLE · RESELL</span>
     <h1 class="rl-display">Know what it's worth before you sell it.</h1>
     <p>Reuse it, resell it, or recycle it. ReLoop helps you decide, in that order.</p>
     <div class="rl-chips">
