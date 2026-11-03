@@ -1378,7 +1378,7 @@ if active_section == "Scrap Vision":
     st.markdown("&nbsp;")
     st.subheader("Who should you sell to?")
     area = st.selectbox(
-        "Your area", list(AREAS), key="scrap_dealer_area",
+        "Choose your area", list(AREAS), key="scrap_dealer_area",
         index=list(AREAS).index(area),
     )
     me = AREAS[area]
