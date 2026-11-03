@@ -668,7 +668,7 @@ RATES = {  # illustrative Rs per kg, localize city by city
 # OWNER-ONLY AREA DIRECTORY — add a neighborhood here before assigning dealers to it.
 # Format: "Neighborhood name": (latitude, longitude). Use the neighborhood's center.
 AREAS = {
-    "Kumaraswamy Layout": (12.9082, 77.5646),
+    "WhiteField": (12.9082, 77.5646),
     "Banashankari": (12.9255, 77.5468),
     "JP Nagar": (12.9063, 77.5857),
     "Jayanagar": (12.9308, 77.5838),
