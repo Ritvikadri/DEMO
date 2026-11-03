@@ -1276,7 +1276,7 @@ if active_section == "Scrap Vision":
                     st.info("Photo uploaded. Add GEMINI_API_KEY to Streamlit secrets to analyze it automatically, or enter materials and weights in the table.")
         else:
             st.session_state.scrap_photo_signature = None
-            st.caption("No photo yet? You can still enter materials by hand on the right.")
+            st.caption("No photo yet? You can still enter materials manually on the right.")
 
     with right:
         if st.session_state.scrap_df is None:
