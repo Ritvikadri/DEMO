@@ -1332,7 +1332,7 @@ if active_section == "Scrap Vision":
             unsafe_allow_html=True,
         )
         if st.button(
-            "Save best shop offer to my impact",
+            "ADD TO IMPACT",
             key="save_scrap",
             disabled=(fair <= 0 or best_dealer is None),
             use_container_width=True,
