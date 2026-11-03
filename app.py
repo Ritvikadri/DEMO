@@ -1244,37 +1244,37 @@ if active_section == "Scrap Vision":
             for i, (n, data) in enumerate(photos):
                 gcols[i % len(gcols)].image(data, caption=n, use_container_width=True)
             st.caption(f"{len(photos)} photo{'s' if len(photos) != 1 else ''} in the pile. Add more any time, they all stay.")
-            picks = st.multiselect(
-                "Quick pick: what is in the pile?",
-                list(RATES),
-                default=[],
-                help="Used for a photo when AI analysis is not available. You can edit the weights on the right.",
+            # Analyze automatically once when the uploaded/captured photo set changes.
+            # Its signature prevents API calls from repeating on normal Streamlit reruns.
+            photo_signature = tuple(
+                (name, hashlib.sha1(data).hexdigest()) for name, data in photos
             )
-            if st.button("Identify materials", key="detect"):
+            if photo_signature != st.session_state.get("scrap_photo_signature"):
+                st.session_state.scrap_photo_signature = photo_signature
                 st.session_state.scrap_ver += 1
-                with st.spinner(f"Reading {len(photos)} photo{'s' if len(photos) != 1 else ''}..."):
-                    t0 = time.perf_counter()
-                    errors = []
-                    if has_api_key():
-                        results, errors = analyze_photos(photos, picks)
-                    else:
-                        results = [(pick_df(picks), dict(model="quick pick", resize=0.0, api=0.0)) for _ in photos]
-                        st.info("Demo mode: using your quick pick. Add GEMINI_API_KEY to .streamlit/secrets.toml for real photo analysis.")
-                    elapsed = time.perf_counter() - t0
-                st.session_state.photo_results = [
-                    dict(name=n, df=r[0], tm=r[1]) for (n, _), r in zip(photos, results)
-                ]
-                st.session_state.scrap_df = (
-                    pd.concat([r[0] for r in results])
-                    .groupby("Material", as_index=False, sort=False)["Weight (kg)"].sum()
-                )
-                st.caption(f"Analysed {len(photos)} photo{'s' if len(photos) != 1 else ''} in {elapsed:.1f}s "
-                           f"with {results[0][1]['model']}. All photos are combined in the table.")
-                if errors:
-                    st.warning("Some photos could not be analysed, so your quick pick is used for them.")
-                    st.error("Gemini error: " + " || ".join(errors)[:700])
-                    st.info(key_status())
+                if has_api_key():
+                    with st.spinner(f"Reading {len(photos)} photo{'s' if len(photos) != 1 else ''}..."):
+                        t0 = time.perf_counter()
+                        results, errors = analyze_photos(photos, [])
+                        elapsed = time.perf_counter() - t0
+                    st.session_state.photo_results = [
+                        dict(name=n, df=r[0], tm=r[1]) for (n, _), r in zip(photos, results)
+                    ]
+                    st.session_state.scrap_df = (
+                        pd.concat([r[0] for r in results])
+                        .groupby("Material", as_index=False, sort=False)["Weight (kg)"].sum()
+                    )
+                    st.caption(f"Analysed {len(photos)} photo{'s' if len(photos) != 1 else ''} in {elapsed:.1f}s "
+                               f"with {results[0][1]['model']}. All photos are combined in the table.")
+                    if errors:
+                        st.warning("Some photos could not be analysed. Add their materials and weights in the table.")
+                        st.error("Gemini error: " + " || ".join(errors)[:700])
+                        st.info(key_status())
+                else:
+                    st.session_state.photo_results = []
+                    st.info("Photo uploaded. Add GEMINI_API_KEY to Streamlit secrets to analyze it automatically, or enter materials and weights in the table.")
         else:
+            st.session_state.scrap_photo_signature = None
             st.caption("No photo yet? You can still enter materials by hand on the right.")
 
     with right:
@@ -1342,25 +1342,12 @@ if active_section == "Scrap Vision":
             or f"https://www.google.com/maps/search/?api=1&query={dealer['lat']},{dealer['lon']}",
         })
     rows.sort(key=lambda r: -r["offer"])
-    # Closest quoted amount to the estimated fair value wins. If the scrap
-    # estimate is ₹0, offers all calculate to ₹0, so use the closest percentage
-    # of fair value as the tie-breaker instead of marking the first card.
-    best_offer_index = (
-        min(
-            range(len(rows)),
-            key=lambda index: (
-                abs(rows[index]["offer"] - fair),
-                abs(rows[index]["share"] - 1.0),
-            ),
-        )
-        if rows else None
-    )
 
     user_name = (current_user.get("name") or (current_user.get("metadata") or {}).get("full_name") or "").strip()
     scrap_items = [(m, float(w)) for m, w in zip(df["Material"], df["Weight (kg)"])]
     dealer_cards = []
     for i, r in enumerate(rows):
-        best = '<span class="rl-tag best">Best offer</span>' if i == best_offer_index else ""
+        best = '<span class="rl-tag best">Best offer</span>' if i == 0 else ""
         if r["phone"].strip():
             wa_link = whatsapp_url(
                 r["phone"], pickup_message(r["name"], user_name, area, scrap_items, kg, fair)
