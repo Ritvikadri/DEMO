@@ -1703,7 +1703,7 @@ if active_section == "Sound Check":
             appliance = other_appliance.strip() or "Other appliance"
         else:
             appliance = appliance_choice
-        st.caption("Record the appliance running steadily in a quiet place. The prototype uses one general sound check for every appliance type.")
+        st.caption("Record the appliance running steadily in a quiet place.")
         rec = st.audio_input("Record the sound")
         up = st.file_uploader("or upload a WAV or MP3 file", type=["wav", "mp3"])
         audio = rec or up
