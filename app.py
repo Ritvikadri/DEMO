@@ -1606,7 +1606,7 @@ if active_section == "Book Loop":
     inventory_title.markdown("### Your books for sale")
     if refresh_col.button("↻ Check requests", key="refresh_my_book_requests", use_container_width=True):
         st.rerun()
-    st.caption("Your active listings and buyer requests are private to your account.")
+    st.caption("Your books are listed here !")
     try:
         my_listings = load_my_book_listings()
         my_requests = load_requests_for_listings([row["id"] for row in my_listings])
