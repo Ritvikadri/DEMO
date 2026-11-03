@@ -1342,12 +1342,25 @@ if active_section == "Scrap Vision":
             or f"https://www.google.com/maps/search/?api=1&query={dealer['lat']},{dealer['lon']}",
         })
     rows.sort(key=lambda r: -r["offer"])
+    # Closest quoted amount to the estimated fair value wins. If the scrap
+    # estimate is ₹0, offers all calculate to ₹0, so use the closest percentage
+    # of fair value as the tie-breaker instead of marking the first card.
+    best_offer_index = (
+        min(
+            range(len(rows)),
+            key=lambda index: (
+                abs(rows[index]["offer"] - fair),
+                abs(rows[index]["share"] - 1.0),
+            ),
+        )
+        if rows else None
+    )
 
     user_name = (current_user.get("name") or (current_user.get("metadata") or {}).get("full_name") or "").strip()
     scrap_items = [(m, float(w)) for m, w in zip(df["Material"], df["Weight (kg)"])]
     dealer_cards = []
     for i, r in enumerate(rows):
-        best = '<span class="rl-tag best">Best offer</span>' if i == 0 else ""
+        best = '<span class="rl-tag best">Best offer</span>' if i == best_offer_index else ""
         if r["phone"].strip():
             wa_link = whatsapp_url(
                 r["phone"], pickup_message(r["name"], user_name, area, scrap_items, kg, fair)
