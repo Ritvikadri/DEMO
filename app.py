@@ -1264,7 +1264,7 @@ if active_section == "Scrap Vision":
             gcols = st.columns(min(3, len(photos)))
             for i, (n, data) in enumerate(photos):
                 gcols[i % len(gcols)].image(data, caption=n, use_container_width=True)
-            st.caption(f"{len(photos)} photo{'s' if len(photos) != 1 else ''} in the pile. Add more any time, they all stay.")
+            st.caption(f"{len(photos)} photo{'s' if len(photos) != 1 else ''} in the pile. You can add more items to the pile.")
             reverify = st.button("↻ Reverify", key="reverify_photos")
             # Analyze automatically once when the uploaded/captured photo set changes.
             # Its signature prevents API calls from repeating on normal Streamlit reruns.
