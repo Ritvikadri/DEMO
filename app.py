@@ -1025,7 +1025,7 @@ if active_section == "Scrap Vision":
     f"""
 <div class="rl-hero">
   <div>
-    <span class="rl-pill">Team Sutra · Ideathon 2026</span>
+    <span class="rl-pill">REUSE · RECYCLE · RESELL</span>
     <h1 class="rl-display">Know what it's WORTH before you sell it.</h1>
     <p>Reuse it, resell it, or recycle it. ReLoop helps you decide, in that order.</p>
     <div class="rl-chips">
