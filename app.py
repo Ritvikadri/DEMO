@@ -410,6 +410,12 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
   transition: transform .18s ease, border-color .18s ease; }}
 .rl-dealer:hover {{ transform: translateY(-3px); border-color: #3B6A63; }}
 .rl-dealer h4 {{ margin: 0 0 6px 0; min-height: 2.5em; font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.12rem; color: {TEXT}; line-height: 1.25; }}
+.rl-dealer-price-row {{ display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:38px; }}
+.rl-location-link {{ display:inline-flex; flex:0 0 38px; align-items:center; justify-content:center; width:38px; height:38px;
+  color:{MINT}; border:1px solid rgba(111,211,176,.30); border-radius:12px; background:rgba(111,211,176,.08);
+  text-decoration:none !important; transition:background .15s ease, transform .15s ease, border-color .15s ease; }}
+.rl-location-link:hover {{ color:{TEXT}; background:rgba(111,211,176,.2); border-color:{MINT}; transform:translateY(-2px); }}
+.rl-location-link svg {{ width:20px; height:20px; display:block; }}
 .rl-dealer-tags {{ display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 18px 0; }}
 .rl-dealer-tags .rl-tag {{ margin: 0; }}
 .rl-wa-btn {{ margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center;
@@ -682,6 +688,8 @@ AREAS = {
 #   speciality: short materials description shown on the card
 #   phone:      that dealer's individual WhatsApp number with country code
 #               (example format: "+919876543210"). Leave blank until confirmed.
+#   maps_url:   paste the shop's Google Maps share link between the quotes.
+#               If blank, ReLoop opens Google Maps at the coordinates above.
 #
 # Replace the sample dealer entries and blank phone numbers with real, verified
 # details. When phone is blank, the app won't create a broken WhatsApp link.
@@ -692,6 +700,7 @@ AREAS = {
 #     "share": 0.90,                   # 0.90 means an estimated 90% of fair value.
 #     "speciality": "Paper, plastic",
 #     "phone": "+919876543210",       # Enter this dealer's own WhatsApp number.
+#     "maps_url": "https://maps.app.goo.gl/...",  # Paste this shop's Google Maps link.
 # },
 DEALERS_BY_AREA = {
     "Kumaraswamy Layout": [
@@ -704,6 +713,7 @@ DEALERS_BY_AREA = {
             "share": 0.88,
             "speciality": "Paper, plastic",
             "phone": "+917625016830",  # Enter Ramesh Traders' individual WhatsApp number.
+            "maps_url": "",  # Paste Ramesh Traders' Google Maps share link here.
         },
         {
             "name": "Shree Metals",
@@ -711,6 +721,7 @@ DEALERS_BY_AREA = {
             "share": 0.95,
             "speciality": "Metals, e-waste",
             "phone": "+917625016830",  # Enter Shree Metals' individual WhatsApp number.
+            "maps_url": "",  # Paste Shree Metals' Google Maps share link here.
         },
         {
             "name": "Lakshmi Scrap Centre",
@@ -718,6 +729,7 @@ DEALERS_BY_AREA = {
             "share": 0.82,
             "speciality": "All household scrap",
             "phone": "+917625016830",  # Enter Lakshmi Scrap Centre's individual number.
+            "maps_url": "",  # Paste Lakshmi Scrap Centre's Google Maps share link here.
         },
         {
             "name": "Basavanna Recyclers",
@@ -725,6 +737,7 @@ DEALERS_BY_AREA = {
             "share": 0.91,
             "speciality": "Paper, cardboard, glass",
             "phone": "+917625016830",  # Enter Basavanna Recyclers' individual number.
+            "maps_url": "",  # Paste Basavanna Recyclers' Google Maps share link here.
         },
     ],
     "JP Nagar": [
@@ -734,6 +747,7 @@ DEALERS_BY_AREA = {
             "share": 0.88,
             "speciality": "Metal, Steel, Copper",
             "phone": "+919845647024",  # Enter Ramesh Traders' individual WhatsApp number.
+            "maps_url": "",  # Paste AMS Scrap Mercant's Google Maps share link here.
         },
         {
             "name": "AT Scrap",
@@ -741,6 +755,7 @@ DEALERS_BY_AREA = {
             "share": 0.94,
             "speciality": "Metals, Copper, Steel, Aluminium, E-Waste",
             "phone": "+916363640159",  # Enter Shree Metals' individual WhatsApp number.
+            "maps_url": "",  # Paste AT Scrap's Google Maps share link here.
         },
     ],
     "Jayanagar": [
@@ -1286,6 +1301,9 @@ if active_section == "Scrap Vision":
             "spec": dealer["speciality"],
             "share": dealer["share"],
             "phone": dealer["phone"],
+            # An owner-provided Maps share URL takes precedence; coordinates are the fallback.
+            "maps_url": dealer.get("maps_url", "").strip()
+            or f"https://www.google.com/maps/search/?api=1&query={dealer['lat']},{dealer['lon']}",
         })
     rows.sort(key=lambda r: -r["offer"])
 
@@ -1304,10 +1322,25 @@ if active_section == "Scrap Vision":
             )
         else:
             contact_action = '<span class="rl-wa-btn" style="opacity:.65;cursor:default">Contact number not set</span>'
+        map_url = html.escape(r["maps_url"], quote=True)
+        location_icon = (
+            '<a class="rl-location-link" '
+            f'href="{map_url}" target="_blank" rel="noopener noreferrer" '
+            f'aria-label="Open {html.escape(r["name"], quote=True)} in Google Maps" '
+            f'title="Open {html.escape(r["name"], quote=True)} in Google Maps">'
+            '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true" '
+            'xmlns="http://www.w3.org/2000/svg">'
+            '<path d="M20 10.2c0 5.1-8 11.3-8 11.3S4 15.3 4 10.2a8 8 0 1 1 16 0Z" '
+            'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
+            '<circle cx="12" cy="10" r="2.6" stroke="currentColor" stroke-width="1.8"/>'
+            '</svg></a>'
+        )
         dealer_cards.append(
             '<div class="rl-dealer">'
             f'<h4>{html.escape(r["name"])}</h4>'
-            f'<div class="rl-price">₹{r["offer"]:,.0f}</div>'
+            '<div class="rl-dealer-price-row">'
+            f'<div class="rl-price">₹{r["offer"]:,.0f}</div>{location_icon}'
+            '</div>'
             f'<div class="rl-meta">{r["share"] * 100:.0f}% of fair value</div>'
             f'<div class="rl-bar"><i style="width:{r["share"] * 100:.0f}%"></i></div>'
             f'<div class="rl-dealer-tags"><span class="rl-tag">{html.escape(r["spec"])}</span>{best}</div>'
@@ -1809,4 +1842,3 @@ if active_section == "Impact":
         + '</div>',
         unsafe_allow_html=True,
     )
-
