@@ -703,63 +703,99 @@ AREAS = {
 #     "maps_url": "https://maps.app.goo.gl/...",  # Paste this shop's Google Maps link.
 # },
 DEALERS_BY_AREA = {
-    "Kumaraswamy Layout": [
-        # Add only verified kabadiwalas who serve Kumaraswamy Layout here.
-    ],
-    "Banashankari": [
+    "WhiteField": [
         {
-            "name": "Ramesh Traders",
+            "name": "SR SCRAP DEALERS",
             "lat": 12.9140, "lon": 77.5600,
-            "share": 0.88,
-            "speciality": "Paper, plastic",
-            "phone": "+917625016830",  # Enter Ramesh Traders' individual WhatsApp number.
-            "maps_url": "",  # Paste Ramesh Traders' Google Maps share link here.
-        },
-        {
-            "name": "Shree Metals",
-            "lat": 12.9230, "lon": 77.5530,
-            "share": 0.95,
-            "speciality": "Metals, e-waste",
-            "phone": "+917625016830",  # Enter Shree Metals' individual WhatsApp number.
-            "maps_url": "",  # Paste Shree Metals' Google Maps share link here.
-        },
-        {
-            "name": "Lakshmi Scrap Centre",
-            "lat": 12.9010, "lon": 77.5900,
-            "share": 0.82,
+            "share": 0.96,
             "speciality": "All household scrap",
-            "phone": "+917625016830",  # Enter Lakshmi Scrap Centre's individual number.
-            "maps_url": "",  # Paste Lakshmi Scrap Centre's Google Maps share link here.
+            "phone": "+919916410931", 
+            "maps_url": "https://www.google.com/maps/place/SR+SCRAP+DEALERS/@12.981355,77.3448391,11z/data=!4m10!1m2!2m1!1sscrap+shop+in+whitefield!3m6!1s0x3bae0d62e83a3133:0x485d89d59a08d7e9!8m2!3d12.9711442!4d77.7535249!15sChhzY3JhcCBzaG9wIGluIHdoaXRlZmllbGRaGiIYc2NyYXAgc2hvcCBpbiB3aGl0ZWZpZWxkkgESc2NyYXBfbWV0YWxfZGVhbGVymgFEQ2k5RFFVbFJRVU52WkVOb2RIbGpSamx2VDI1d1JWbFZiekZNVjJSVFRVZDRSMVpGYUdGVFJXaFNWMnBvUzFwV1JSQULgAQD6AQQIABBA!16s%2Fg%2F11j384l71g?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste Ramesh Traders' Google Maps share link here.
         },
         {
-            "name": "Basavanna Recyclers",
-            "lat": 12.9300, "lon": 77.5800,
-            "share": 0.91,
-            "speciality": "Paper, cardboard, glass",
-            "phone": "+917625016830",  # Enter Basavanna Recyclers' individual number.
-            "maps_url": "",  # Paste Basavanna Recyclers' Google Maps share link here.
+            "name": "MSS SCRAP DEALERS",
+            "lat": 12.9140, "lon": 77.5600,
+            "share": 0.60,
+            "speciality": "Plastic, Metal, All household scrap",
+            "phone": "+917010623151", 
+            "maps_url": "https://www.google.com/maps/place/MSS+E-WASTE+AND+ALL+KIND+OF+SCRAP+TRADERS/@12.981355,77.3448391,11z/data=!4m10!1m2!2m1!1sscrap+shop+in+whitefield!3m6!1s0x3bae138b149656a3:0x910ccb5c60acc025!8m2!3d12.9764637!4d77.7561391!15sChhzY3JhcCBzaG9wIGluIHdoaXRlZmllbGRaGiIYc2NyYXAgc2hvcCBpbiB3aGl0ZWZpZWxkkgEbcmVjeWNsaW5nX2Ryb3Bfb2ZmX2xvY2F0aW9u4AEA!16s%2Fg%2F11n570dmzg?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3Dhttps://www.google.com/maps/place/MSS+E-WASTE+AND+ALL+KIND+OF+SCRAP+TRADERS/@12.981355,77.3448391,11z/data=!4m10!1m2!2m1!1sscrap+shop+in+whitefield!3m6!1s0x3bae138b149656a3:0x910ccb5c60acc025!8m2!3d12.9764637!4d77.7561391!15sChhzY3JhcCBzaG9wIGluIHdoaXRlZmllbGRaGiIYc2NyYXAgc2hvcCBpbiB3aGl0ZWZpZWxkkgEbcmVjeWNsaW5nX2Ryb3Bfb2ZmX2xvY2F0aW9u4AEA!16s%2Fg%2F11n570dmzg?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste Ramesh Traders' Google Maps share link here.
+        },
+        {
+            "name": "ABM SCRAP DEALER",
+            "lat": 12.9140, "lon": 77.5600,
+            "share": 0.97,
+            "speciality": "Metal, All household scrap",
+            "phone": "+919036340402", 
+            "maps_url": "https://www.google.com/maps/place/ABM+SCRAP+DEALER/@12.981355,77.3448391,11z/data=!4m10!1m2!2m1!1sscrap+shop+in+whitefield!3m6!1s0x3bae117871b1c3d3:0x8806323a40d78d6!8m2!3d12.9725877!4d77.7546121!15sChhzY3JhcCBzaG9wIGluIHdoaXRlZmllbGRaGiIYc2NyYXAgc2hvcCBpbiB3aGl0ZWZpZWxkkgEOc2NyYXBfbWVyY2hhbnTgAQA!16s%2Fg%2F11n3z3dd_f?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste Ramesh Traders' Google Maps share link here.
         },
     ],
-    "JP Nagar": [
+
+    
+    "Banashankari": [
         {
             "name": "AMS Scrap Mercant",
             "lat": 12.9140, "lon": 77.5600,
             "share": 0.88,
             "speciality": "Metal, Steel, Copper",
-            "phone": "+919845647024",  # Enter Ramesh Traders' individual WhatsApp number.
-            "maps_url": "",  # Paste AMS Scrap Mercant's Google Maps share link here.
+            "phone": "+919845647024", 
+            "maps_url": "https://www.google.com/maps/place/AMS+Scrap+Merchant+-+Metal+Steel+Scrap+and+copper+buyers/@12.9245901,77.4134618,12z/data=!4m10!1m2!2m1!1sAMS+Scrap+Mercant+neaar+jp+nagar!3m6!1s0x3bae1596b577ac9b:0x4e93e3352888d4b2!8m2!3d12.9245901!4d77.5658971!15sCiBBTVMgU2NyYXAgTWVyY2FudCBuZWFhciBqcCBuYWdhcloiIiBhbXMgc2NyYXAgbWVyY2FudCBuZWFhciBqcCBuYWdhcpIBEnNjcmFwX21ldGFsX2RlYWxlcuABAA!16s%2Fg%2F11npck2dpr?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste Ramesh Traders' Google Maps share link here.
         },
         {
             "name": "AT Scrap",
             "lat": 12.9230, "lon": 77.5530,
-            "share": 0.94,
+            "share": 0.95,
             "speciality": "Metals, Copper, Steel, Aluminium, E-Waste",
             "phone": "+916363640159",  # Enter Shree Metals' individual WhatsApp number.
-            "maps_url": "https://www.google.com/maps/place/AT+Scrap+-+Metal,+Copper,+Aluminium+and+Electronic+Items/@12.9154428,77.5344925,14z/data=!4m10!1m2!2m1!1sscrap+shop+near+jp+nagar!3m6!1s0x3bae151f6301d38f:0xaff5d348a20e5ba6!8m2!3d12.9154428!4d77.5726013!15sChhzY3JhcCBzaG9wIG5lYXIganAgbmFnYXJaGiIYc2NyYXAgc2hvcCBuZWFyIGpwIG5hZ2FykgEMc2FsdmFnZV95YXJk4AEA!16s%2Fg%2F11w2k6yz06?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste AT Scrap's Google Maps share link here.
+            "maps_url": "https://www.google.com/maps/place/AT+Scrap+-+Metal,+Copper,+Aluminium+and+Electronic+Items/@12.9245643,77.4134616,12z/data=!4m10!1m2!2m1!1sscrap+shop+near+banashakari!3m6!1s0x3bae151f6301d38f:0xaff5d348a20e5ba6!8m2!3d12.9154428!4d77.5726013!15sChxzY3JhcCBzaG9wIG5lYXIgYmFuYXNoYW5rYXJpWh4iHHNjcmFwIHNob3AgbmVhciBiYW5hc2hhbmthcmmSAQxzYWx2YWdlX3lhcmTgAQA!16s%2Fg%2F11w2k6yz06?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste Shree Metals' Google Maps share link here.
+        },
+        {
+            "name": "S A Scrap Traders",
+            "lat": 12.9010, "lon": 77.5900,
+            "share": 0.82,
+            "speciality": "All household scrap",
+            "phone": "+919880459102",  # Enter Lakshmi Scrap Centre's individual number.
+            "maps_url": "https://www.google.com/maps/place/S+A+Traders.all+types+of+Old+scrap+%26+services+all+electrical+items+%26+extra.../@12.9245643,77.4134616,12z/data=!4m10!1m2!2m1!1sscrap+shop+near+banashakari!3m6!1s0x3bae1565aeb78ebb:0xc0db74270e02c275!8m2!3d12.9094906!4d77.5701551!15sChxzY3JhcCBzaG9wIG5lYXIgYmFuYXNoYW5rYXJpWh4iHHNjcmFwIHNob3AgbmVhciBiYW5hc2hhbmthcmmSARJzY3JhcF9tZXRhbF9kZWFsZXKaASRDaGREU1VoTk1HOW5TMFZKUTBGblNVUlllbDlYWm10blJSQULgAQD6AQQIABA1!16s%2Fg%2F1yfjqffm9?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste Lakshmi Scrap Centre's Google Maps share link here.
+        },
+        {
+            "name": "SKF Scrap Dealers",
+            "lat": 12.9300, "lon": 77.5800,
+            "share": 0.91,
+            "speciality": "Paper, cardboard, glass",
+            "phone": "+919731477886",  
+            "maps_url": "https://www.google.com/maps/place/Skf+Traders+-+Scrap+Dealers/@12.9245643,77.4134616,12z/data=!4m10!1m2!2m1!1sscrap+shop+near+banashakari!3m6!1s0x3bae3fa71da1a823:0xdb1660f2b5769cc8!8m2!3d12.9238371!4d77.5475943!15sChxzY3JhcCBzaG9wIG5lYXIgYmFuYXNoYW5rYXJpWh4iHHNjcmFwIHNob3AgbmVhciBiYW5hc2hhbmthcmmSAQxzYWx2YWdlX3lhcmSaAURDaTlEUVVsUlFVTnZaRU5vZEhsalJqbHZUMnhuZWsxc1pHWmtWMVpPWVVob2NFMXVhR0ZWUnpWRFYwVldlbU5XUlJBQuABAPoBBAgAEBg!16s%2Fg%2F11z5wl311p?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste Basavanna Recyclers' Google Maps share link here.
         },
     ],
+
+    
+    "JP Nagar": [
+        {
+            "name": "Scrapxperts - Metal Scrap Buyers",
+            "lat": 12.9140, "lon": 77.5600,
+            "share": 0.88,
+            "speciality": "Metal, Steel, Copper",
+            "phone": "+919008180928",  # Enter Ramesh Traders' individual WhatsApp number.
+            "maps_url": "https://www.google.com/maps/place/Scrapxperts+-+Metal+Scrap+Buyers+%7C+Office+%26+Home+Clearance+Services/@12.8727812,77.5287366,14z/data=!4m10!1m2!2m1!1sscrap+shop+near+jp+nagar!3m6!1s0x3bae6bd34adc8ca5:0xa167b05e57b64612!8m2!3d12.8727812!4d77.5668454!15sChhzY3JhcCBzaG9wIG5lYXIganAgbmFnYXJaGiIYc2NyYXAgc2hvcCBuZWFyIGpwIG5hZ2FykgESc2NyYXBfbWV0YWxfZGVhbGVy4AEA!16s%2Fg%2F11nhxhpbg3?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste AMS Scrap Mercant's Google Maps share link here.
+        },
+        {
+            "name": "Twin Leafs Enterprises",
+            "lat": 12.9230, "lon": 77.5530,
+            "share": 0.94,
+            "speciality": "All household scrap",
+            "phone": "+919880382650",  # Enter Shree Metals' individual WhatsApp number.
+            "maps_url": "https://www.google.com/maps/place/Twin+Leafs+Enterprises/@12.9201365,77.5522616,14z/data=!4m10!1m2!2m1!1sscrap+shop+near+jp+nagar!3m6!1s0x3bae15f13b440193:0x7575c7c205996e22!8m2!3d12.9088969!4d77.5735073!15sChhzY3JhcCBzaG9wIG5lYXIganAgbmFnYXJaGiIYc2NyYXAgc2hvcCBuZWFyIGpwIG5hZ2FykgESc2NyYXBfbWV0YWxfZGVhbGVymgEkQ2hkRFNVaE5NRzluUzBWSlEwRm5TVVJhTjB4VE1qSlJSUkFC4AEA-gEECE8QMA!16s%2Fg%2F11ff526995?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste AT Scrap's Google Maps share link here.
+        },
+    ],
+
+    
     "Jayanagar": [
-        # Add only verified kabadiwalas who serve Jayanagar here.
+         {
+            "name": "JB Steel Scrap Dealers",
+            "lat": 12.9140, "lon": 77.5600,
+            "share": 0.88,
+            "speciality": "Metal, Steel, Copper",
+            "phone": "+919945909873",  # Enter Ramesh Traders' individual WhatsApp number.
+            "maps_url": "https://www.google.com/maps/place/JB+Steel+Scrap+Dealers/@12.9201365,77.5522616,14z/data=!4m10!1m2!2m1!1sscrap+shop+near+jp+nagar!3m6!1s0x3bae15799837be91:0x83a2372cfab99e5c!8m2!3d12.9201413!4d77.5903705!15sChhzY3JhcCBzaG9wIG5lYXIganAgbmFnYXJaGiIYc2NyYXAgc2hvcCBuZWFyIGpwIG5hZ2FykgESc2NyYXBfbWV0YWxfZGVhbGVy4AEA!16s%2Fg%2F11ghls98fx?entry=ttu&g_ep=EgoyMDI2MTAyOC4wIKXMDSoASAFQAw%3D%3D",  # Paste AMS Scrap Mercant's Google Maps share link here.
+        },
     ],
 }
 
