@@ -461,7 +461,7 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-imp-grid.g-three {{ grid-template-columns: repeat(3, minmax(0, 1fr)); }}
 .rl-imp-grid.g-detail {{ grid-template-columns: 1fr 1.4fr; }}
 .rl-imp-grid > div {{ box-sizing: border-box; min-width: 0; }}
-.rl-imp-hero {{ position: relative; overflow: hidden; box-sizing: border-box; min-height: 0; align-self: start; border-radius: 26px; padding: 26px 30px;
+.rl-imp-hero {{ position: relative; overflow: hidden; box-sizing: border-box; min-height: 0; border-radius: 26px; padding: 26px 30px;
   background:
     radial-gradient(520px 260px at 100% 0%, rgba(242,177,56,.26), transparent 62%),
     radial-gradient(440px 280px at 0% 100%, rgba(111,211,176,.16), transparent 62%),
@@ -476,7 +476,7 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-imp-split span {{ background: rgba(255,255,255,.05); border: 1px solid {LINE}; border-radius: 12px; padding: 8px 14px; color: {MUTE}; font-size: .9rem; }}
 .rl-imp-split b {{ color: {TEXT}; font-weight: 700; margin-right: 4px; font-variant-numeric: tabular-nums; }}
 
-.rl-imp-level {{ box-sizing: border-box; min-height: 0; align-self: start; border-radius: 26px; padding: 24px 26px; border: 1px solid {LINE};
+.rl-imp-level {{ box-sizing: border-box; min-height: 0; border-radius: 26px; padding: 24px 26px; border: 1px solid {LINE};
   background: linear-gradient(180deg, {SURFACE2} 0%, {SURFACE} 100%); box-shadow: 0 18px 40px -26px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.04); }}
 .rl-imp-levelrow {{ display: flex; align-items: center; gap: 14px; margin: 13px 0 14px 0; }}
 .rl-imp-badge {{ width: 60px; height: 60px; flex: none; border-radius: 18px; display: grid; place-items: center; font-size: 1.9rem;
@@ -487,15 +487,14 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 .rl-imp-progress i {{ display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, {MINT}, {MARIGOLD}); }}
 .rl-imp-next {{ color: {TEXT}; font-size: .9rem; margin-top: 8px; }}
 .rl-imp-tip {{ color: {MUTE}; font-size: .78rem; line-height:1.4; margin-top: 10px; }}
-.rl-imp-contrib {{ margin-top:10px; padding:8px 10px; border-radius:11px; background:rgba(111,211,176,.07);
-  border:1px solid rgba(111,211,176,.16); color:{MUTE}; font-size:.8rem; line-height:1.35; }}
+.rl-imp-contrib {{ margin-top:9px; padding:0; color:{MUTE}; font-size:.8rem; line-height:1.35; }}
 .rl-imp-contrib b {{ color:{TEXT}; }}
-.rl-imp-benchmarks {{ display:flex; align-items:center; flex-wrap:wrap; gap:5px; margin-top:10px; }}
-.rl-imp-benchmark {{ display:inline-flex; align-items:center; gap:3px; min-width:0; padding:3px 5px; border-radius:7px;
-  background:transparent; border:1px solid transparent; color:{MUTE}; font-size:.64rem; white-space:nowrap; }}
+.rl-imp-benchmarks {{ display:flex; align-items:center; flex-wrap:wrap; gap:3px 8px; margin-top:9px; }}
+.rl-imp-benchmark {{ display:inline-flex; align-items:center; gap:3px; min-width:0; padding:2px 0; border-radius:0;
+  background:transparent; border:0; color:{MUTE}; font-size:.64rem; white-space:nowrap; }}
 .rl-imp-benchmark b {{ color:{TEXT}; font-weight:650; }}
 .rl-imp-benchmark small {{ color:{MUTE}; font-size:.61rem; }}
-.rl-imp-benchmark.current {{ border-color:rgba(242,177,56,.52); background:rgba(242,177,56,.10); }}
+.rl-imp-benchmark.current {{ text-decoration:underline; text-decoration-color:rgba(242,177,56,.75); text-underline-offset:3px; }}
 .rl-imp-benchmark.current b {{ color:{MARIGOLD}; }}
 
 .rl-imp-panel {{ box-sizing: border-box; border-radius: 22px; padding: 22px 24px; border: 1px solid {LINE};
@@ -531,7 +530,7 @@ header[data-testid="stHeader"], footer, #MainMenu {{ visibility: hidden; height:
 @media (max-width: 900px) {{
   .rl-imp-grid.g-head, .rl-imp-grid.g-three, .rl-imp-grid.g-detail {{ grid-template-columns: 1fr; gap: 18px; }}
   .rl-imp-benchmarks {{ gap: 3px; }}
-  .rl-imp-benchmark {{ font-size: .62rem; padding: 3px 4px; }}
+  .rl-imp-benchmark {{ font-size: .62rem; padding: 2px 0; }}
   .rl-imp-benchmark small {{ font-size: .58rem; }}
   .rl-imp-big {{ font-size: 2.8rem; }}
   .rl-imp-hero, .rl-imp-level {{ min-height: 0; }}
@@ -1874,7 +1873,7 @@ if active_section == "Impact":
         else f"{nxt[0] - points_total:,} points to {nxt[1]}"
     benchmark_html = "".join(
         f'<span class="rl-imp-benchmark{" current" if level_name == cur[1] else ""}">'
-        f'{emoji}<b>{html.escape(level_name)}</b><small>{threshold:,} pts</small></span>'
+        f'<b>{html.escape(level_name)}</b><small>{threshold:,}</small></span>'
         for threshold, level_name, emoji in LEVELS
     )
     hero_html = (
@@ -1896,9 +1895,8 @@ if active_section == "Impact":
         f'<div><div class="rl-imp-pts">{points_total:,}</div><div class="rl-imp-lvl">{cur[1]} level</div></div></div>'
         f'<div class="rl-imp-progress"><i style="width:{level_pct:.0f}%"></i></div>'
         f'<div class="rl-imp-next">{next_text}</div>'
-        f'<div class="rl-imp-contrib"><b>Your progress:</b> {len(sale_rows)} books sold · {points_total:,} points earned</div>'
+        f'<div class="rl-imp-contrib"><b>Your progress:</b> {len(sale_rows)} books sold · {points_total:,} points · 100 points per sale</div>'
         f'<div class="rl-imp-benchmarks">{benchmark_html}</div>'
-        '<div class="rl-imp-tip">Marking a book Sold earns 100 points.</div>'
         '</div>'
     )
     st.markdown(f'<div class="rl-imp-grid g-head">{hero_html}{level_html}</div>', unsafe_allow_html=True)
