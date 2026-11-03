@@ -1172,7 +1172,7 @@ if active_section == "Scrap Vision":
   <div>
     <span class="rl-pill">REUSE · RECYCLE · RESELL</span>
     <h1 class="rl-display">Know what it's worth before you sell it.</h1>
-    <p>Reuse it, resell it, or recycle it. ReLoop helps you decide, in that order.</p>
+    <p>Reuse it, Resell it, or Recycle it. ReLoop helps you decide !</p>
     <div class="rl-chips">
       <span class="rl-chip"><b>Scrap</b> priced by photo</span>
       <span class="rl-chip"><b>Books</b> passed to juniors</span>
