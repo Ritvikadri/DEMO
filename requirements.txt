@@ -1,7 +1,1 @@
-streamlit>=1.40
-numpy
-pandas
-pillow
-google-genai
-supabase
-av
+#This is used to test programs/softwares
