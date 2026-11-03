@@ -1290,6 +1290,11 @@ if active_section == "Scrap Vision":
                     with st.spinner(f"Reading {len(photos)} photo{'s' if len(photos) != 1 else ''}..."):
                         t0 = time.perf_counter()
                         results, errors = analyze_photos(photos, [], force=reverify)
+                        # Retry once automatically if Gemini returns malformed
+                        # JSON without the expected "items" field.
+                        if any("KeyError" in err and "'items'" in err for err in errors):
+                            with st.spinner("Gemini returned an incomplete result. Rechecking the photo once..."):
+                                results, errors = analyze_photos(photos, [], force=True)
                         elapsed = time.perf_counter() - t0
                     st.session_state.photo_results = [
                         dict(name=n, df=r[0], tm=r[1]) for (n, _), r in zip(photos, results)
